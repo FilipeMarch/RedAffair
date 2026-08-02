@@ -1,18 +1,21 @@
 import random, sys, os, textwrap
 
 sfx_queue = None
-cheat_unlimited_cuffs = False
-cheat_god_mode = False
-cheat_infinite_countenance = False
 
 def play_game():
     RED = '\033[31m'
     BLACK_BG = '\033[40m'
     BOLD = '\033[1m'
     RESET = '\033[0m'
-    GRAY = '\033[90m'
 
-    TOTAL_NON_MISLEADING = 21 
+    TOTAL_NON_MISLEADING = 21
+
+    TRUST_PHRASES = {
+        0: "fragile as a soap bubble",
+        1: "thin as a veil",
+        2: "willing to relax",
+        3: "strong as steel"
+    }
 
     def clear_screen():
         print("##CLEARSCREEN##")
@@ -249,14 +252,6 @@ def play_game():
         RESERVED_KEY_THX1138: None
     }
 
-    # -- Dynamic expansions --
-    freezer_unlocked = False
-    freezer_cleaver_found = False
-    bathroom_panel_revealed = False
-    revolver_found = False
-    bullet_found_in_office = False
-    label_taken = False
-
     locations = {
         "counter": {
             "desc": (
@@ -291,7 +286,7 @@ def play_game():
                 + suspect_descriptions["cleopatra"] + "\n\n" + suspect_descriptions["cook"] +
                 "\nA corkboard hangs beside the back door, pinned with old schedules, a faded menu, and a flier."
             ),
-            "items": ["candlestick", "label"],
+            "items": ["candlestick"],
             "suspects": ["cleopatra", "cook"],
             "searchable": ["alice_alibi", "adeline_timestamps"],
             "examinables": ["corkboard", "freezer"]
@@ -305,8 +300,7 @@ def play_game():
             "items": ["poison vial", "ring_or_id"],
             "suspects": [RESERVED_KEY_THX1138],
             "searchable": ["nyx_message"],
-            "body_examinable": False,
-            "bullet_found": False
+            "body_examinable": False
         },
         "bathroom": {
             "desc": (
@@ -318,15 +312,7 @@ def play_game():
             "items": [],
             "suspects": [],
             "searchable": [],
-            "body_examinable": True,
-            "datachip_found": False
-        },
-        "freezer": {
-            "desc": "FREEZER – A cramped sub-zero storage locker. Frost creeps over plastic crates and a half-empty case of synth-crab.",
-            "items": [],
-            "suspects": [],
-            "searchable": [],
-            "body_examinable": False
+            "body_examinable": True
         }
     }
 
@@ -339,12 +325,11 @@ def play_game():
     handcuffs = 3
     clues = set()
     body_examined = False
+    revolver_found = False
     game_over = False
     traits_revealed = set()
     trust = {}
     nyx_escape_offered = False
-    nyx_escaped = False
-    corruption_planted = None
     talk_history = {}
     countenance_used = False
     required_incriminating = 3
@@ -375,36 +360,36 @@ def play_game():
     }
 
     MISLEADING_DIALOGUE = {
-        "luka_says_cook_threatened": "'That cook... I heard her say she'd shut Marsha up for good.'",
+        "luka_says_cook_threatened": "'That cook... I heard her say she'd shut the victim up for good.'",
         "luka_says_patron_was_outside": "'The old man? He went outside right before the shot. I swear I heard the airlock cycle.'",
-        "luka_says_ring_was_planted": "'The ring... I think someone else took it, or maybe she lost it. I'm being framed. Marsha was a bitch anyway.'",
+        "luka_says_ring_was_planted": "'The ring... I think someone else took it, or maybe she lost it. I'm being framed. She was a bitch anyway.'",
         "adeline_says_janitor_stole_ring": "'Elliot? He's been obsessed with that ring. Probably sold it to cover his debts.'",
-        "adeline_says_alice_argued": "'Alice and Marsha had a screaming match. Something about a promotion, or a client...I don't really remember.'",
-        "adeline_says_victim_was_armed": "'Marsha carried a small knife. She wasn't defenceless. She was ruthless and cruel. I'm not surprised she got got.'",
+        "adeline_says_alice_argued": "'Alice and the victim had a screaming match. Something about a promotion, or a client...I don't really remember.'",
+        "adeline_says_victim_was_armed": "'The victim carried a small knife. She wasn't defenceless. She was ruthless and cruel. I'm not surprised she got got.'",
         "hemlock_says_blake_threatened": "'That short fellow? He was muttering threats under his breath all evening.'",
         "hemlock_says_airlock_heard": "'I heard the airlock hiss. Someone came or went right before the bang.'",
         "hemlock_says_nyx_was_calm": "'Nyx? They were the calmest person in the room when it happened. Suspiciously calm.'",
         "aiden_says_alice_promoted": "'Alice never got the promotion that she wanted. That's motive enough.'",
-        "aiden_says_alice_paycheck": "'Alice's paycheck was docked because of Marsha. She was furious. At least, that's how I remember it.'",
-        "aiden_says_victim_angry": "'Marsha was angry at everyone. It was only a matter of time. I don't know what it was, but she was in a dark place, and she always made that everyone else's problem too.'",
-        "alice_blake_screenshots": "'Blake sent threatening messages to Marsha. I have screenshots. Here, let me send them to you.'",
-        "alice_victim_msg_afraid": "'Marsha told me she was scared to be here. I'm not sure why she was here, but she was.'",
-        "alice_victim_cant_stay_home": "'Marsha said she couldn't stay in her apartment anymore. Someone was harassing her.'",
-        "blake_nyx_bully": "'Nyx bullied Marsha constantly. It was psychological warfare. I don't know if they were together or if Nyx was just holding her hostage.'",
-        "blake_nyx_called_out": "'Nyx was called out by Marsha in front of everyone. Humiliated. She didn't react, but we all know she was waiting for the right moment.'",
-        "blake_victim_distant": "'Marsha had become distant lately. She knew something was coming. I tried to reach out to her. She just wouldn't let me.'",
-        "nyx_aiden_resented": "'Aiden resented Marsha for reporting him to management. He had plenty run-ins with her, and every one was something he'd whine about like a school-girl.'",
-        "nyx_alice_promoted_over_victim": "'Alice leapfrogged Marsha for that promotion. She'd waited years for that spot, and she didn't think Alice deserved it.'",
-        "nyx_victim_didnt_want_return": "'Marsha didn't want to come back here. She knew it wasn't safe. She just couldn't stay in her apartment either, I'm sure you've heard the rumors, right? How Blake was terrorizing her?'"
+        "aiden_says_alice_paycheck": "'Alice's paycheck was docked because of the victim. She was furious. At least, that's how I remember it.'",
+        "aiden_says_victim_angry": "'The victim was angry at everyone. It was only a matter of time. I don't know what it was, but she was in a dark place, and she always made that everyone else's problem too.'",
+        "alice_blake_screenshots": "'Blake sent threatening messages to the victim. I have screenshots. Here, let me send them to you.'",
+        "alice_victim_msg_afraid": "'The victim told me she was scared to be here. I'm not sure why she was here, but she was.'",
+        "alice_victim_cant_stay_home": "'The victim said she couldn't stay in her apartment anymore. Someone was harassing her.'",
+        "blake_nyx_bully": "'Nyx bullied the victim constantly. It was psychological warfare. I don't know if they were together or if Nyx was just holding her hostage.'",
+        "blake_nyx_called_out": "'Nyx was called out by the victim in front of everyone. Humiliated. She didn't react, but we all know she was waiting for the right moment.'",
+        "blake_victim_distant": "'The victim had become distant lately. She knew something was coming. I tried to reach out to her. She just wouldn't let me.'",
+        "nyx_aiden_resented": "'Aiden resented the victim for reporting him to management. He had plenty run-ins with her, and every one was something he'd whine about like a school-girl.'",
+        "nyx_alice_promoted_over_victim": "'Alice leapfrogged her for that promotion. She'd waited years for that spot, and she didn't think Alice deserved it.'",
+        "nyx_victim_didnt_want_return": "'The victim didn't want to come back here. She knew it wasn't safe. She just couldn't stay in her apartment either, I'm sure you've heard the rumors, right? How Blake was terrorizing her?'"
     }
 
     MOTIVE_GOSSIP = {
         "marcus": ("cleopatra", "'I heard that Alice had a breakdown in business negotiations. Something about a hostile takeover that went south.'", "marcus_gossip_cleopatra"),
-        "napoleon": ("marcus", "'Aiden? He had personal differences with Marsha over the use of power. I heard he was close to being fired.'", "napoleon_gossip_marcus"),
-        "cleopatra": ("napoleon", "'Blake used to date Marsha. Bad breakup. I'm talking the kind that leaves blood on the cutting room floor.'", "cleopatra_gossip_napoleon"),
-        "janitor": ("cook", "'That cook... I overheard her saying Marsha was her landlord. Always demanding rent. She called her a leech.'", "janitor_gossip_cook"),
-        "cook": ("janitor", "'Elliot? Marsha accused him of stealing a ring. He spent days looking for it, even after everyone thought he was faking.'", "cook_gossip_janitor"),
-        "patron": ("thatcher", "'Nyx... Marsha stood up to them once. I mean Marsha, I mean. She didn't back down. Nyx hates being challenged.'", "patron_gossip_thatcher"),
+        "napoleon": ("marcus", "'Aiden? He had personal differences with the victim over the use of power. I heard he was close to being fired.'", "napoleon_gossip_marcus"),
+        "cleopatra": ("napoleon", "'Blake used to date the victim. Bad breakup. I'm talking the kind that leaves blood on the cutting room floor.'", "cleopatra_gossip_napoleon"),
+        "janitor": ("cook", "'That cook... I overheard her saying the victim was her landlord. Always demanding rent. She called her a leech.'", "janitor_gossip_cook"),
+        "cook": ("janitor", "'Elliot? The victim accused him of stealing a ring. He spent days looking for it, even after everyone thought he was faking.'", "cook_gossip_janitor"),
+        "patron": ("thatcher", "'Nyx... She stood up to them once. The victim, I mean. She didn't back down. Nyx hates being challenged.'", "patron_gossip_thatcher"),
         RESERVED_KEY_THX1138: ("patron", "'Hemlock? He claims he was in the bathroom, but I saw him go out the front door. He's hiding something.'", "nyx_gossip_patron")
     }
 
@@ -419,239 +404,50 @@ def play_game():
     }
 
     EVIDENCE_DESCRIPTIONS = {
-        "aiden_alibi": "Payphone log. Aiden was on a call at time of death.",
-        "luka_alibi": "Wet floor sign and pristine sheen near the counter. Elliot's alibi.",
-        "blake_alibi": "Time-stamped napkin. Blake's scribblings from all evening.",
-        "blake_alibi_confirmed": "Blake's alibi verified via handwriting scan. Consistent.",
-        "hemlock_missing": "Old coffee receipt, hours before the murder. Doesn't confirm his whereabouts.",
-        "alice_alibi": "Bus ticket stub. Alice arrived just before or after the shot.",
-        "alice_alibi_confirmed": "Alice's alibi verified by transit database. Legitimate ticket.",
-        "adeline_timestamps": "Stock bucket label with timestamped order docket. Adeline's alibi.",
-        "adeline_alibi_confirmed": "Adeline's alibi verified by freezer logs. She was in the freezer at time of death.",
-        "nyx_message": "Torn paper. Nyx's handwriting. An angry letter to the victim.",
+        "aiden_alibi": "Payphone log. Aiden Adams was on a call at time of death.",
+        "luka_alibi": "Wet floor sign and pristine sheen near the counter. Elliot Luka's alibi.",
+        "blake_alibi": "Time-stamped napkin. Blake Jughashvili's scribblings from all evening.",
+        "hemlock_missing": "Old coffee receipt, hours before the murder. Doesn't confirm Alexander Hemlock's whereabouts.",
+        "alice_alibi": "Bus ticket stub. Alice Oliverae arrived just before or after the shot.",
+        "adeline_timestamps": "Stock bucket with timestamped order docket. Adeline Malovega's alibi checks out, at least on the surface.",
+        "nyx_message": "Torn paper. Nyx Singénero's handwriting. An angry letter to the victim.",
         "unknown_revolver": "A revolver, recently fired. The murder weapon.",
-        "aiden_footprint": "Tracks outside the back porthole. Too big to be Aiden's.",
-        "blake_witness": "Someone with strong posture left the office after the bang.",
-        "alice_witness": "Loud argument from the office. Nyx and the victim.",
-        "luka_swept": "Someone walked towards the office with a determined stride.",
-        "adeline_heard": "Loud argument from the office. A woman's voice and someone calm.",
-        "hemlock_yelling": "Heated yelling near the office. Words were unclear.",
-        "cook_landlord": "Adeline revealed the victim was her landlord.",
-        "marcus_gossip_cleopatra": "Aiden says Alice had a breakdown in business negotiations.",
-        "napoleon_gossip_marcus": "Blake says Aiden had personal differences with the victim over power.",
-        "cleopatra_gossip_napoleon": "Alice says Blake and the victim had a bad breakup.",
-        "janitor_gossip_cook": "Elliot says Adeline's landlord was the victim, always demanding rent.",
-        "cook_gossip_janitor": "Adeline says Elliot was accused of stealing a ring and searched for days.",
-        "patron_gossip_thatcher": "Hemlock says Nyx was challenged by the victim and hates being defied.",
-        "nyx_gossip_patron": "Nyx says Hemlock went out the front door, not the bathroom.",
-        "aiden_says_alice_promoted": "Aiden claims Alice never got the promotion she wanted.",
-        "aiden_says_alice_paycheck": "Aiden says Alice's paycheck was docked because of Marsha.",
-        "aiden_says_victim_angry": "Aiden says Marsha was angry at everyone.",
-        "alice_blake_screenshots": "Alice claims Blake sent threatening messages to Marsha.",
-        "alice_victim_msg_afraid": "Alice says Marsha was scared to be here.",
-        "alice_victim_cant_stay_home": "Alice says Marsha couldn't stay in her apartment.",
-        "blake_nyx_bully": "Blake says Nyx bullied Marsha constantly.",
-        "blake_nyx_called_out": "Blake says Nyx was humiliated by Marsha publicly.",
-        "blake_victim_distant": "Blake says Marsha had become distant lately.",
-        "nyx_aiden_resented": "Nyx says Aiden resented Marsha for reporting him.",
-        "nyx_alice_promoted_over_victim": "Nyx says Alice leapfrogged Marsha for a promotion.",
-        "nyx_victim_didnt_want_return": "Nyx says Marsha didn't want to come back.",
-        "luka_says_cook_threatened": "Elliot says Adeline threatened to shut Marsha up.",
-        "luka_says_patron_was_outside": "Elliot says Hemlock went outside right before the shot.",
-        "luka_says_ring_was_planted": "Elliot says the ring was planted to frame him.",
-        "adeline_says_janitor_stole_ring": "Adeline says Elliot stole the ring.",
-        "adeline_says_alice_argued": "Adeline says Alice and Marsha had a screaming match.",
-        "adeline_says_victim_was_armed": "Adeline says Marsha carried a knife.",
-        "hemlock_says_blake_threatened": "Hemlock says Blake was muttering threats.",
-        "hemlock_says_airlock_heard": "Hemlock says he heard the airlock hiss.",
-        "hemlock_says_nyx_was_calm": "Hemlock says Nyx was suspiciously calm.",
-        "bullet_casing": "A spent bullet casing found in the office. Matches the revolver calibre.",
-        "datachip": "A datachip from a loose panel in the bathroom. Contains encrypted communications.",
-        "bloody_cleaver": "A bloody cleaver in the freezer. A grisly red herring.",
-        "cleaver_analysis": "Scanner shows the blood is lab-meat juice, not human.",
+        "aiden_footprint": "Tracks outside the back porthole. Too big to be Aiden Adams'.",
+        "blake_witness": "Someone with strong posture left the office after the bang. Blake Jughashvili heard them.",
+        "alice_witness": "Loud argument from the office. Alice Oliverae heard Nyx Singénero and the victim.",
+        "luka_swept": "Elliot Luka saw someone walk towards the office with a determined stride.",
+        "adeline_heard": "Loud argument from the office. Adeline Malovega heard a woman's voice and someone calm.",
+        "hemlock_yelling": "Heated yelling near the office. Alexander Hemlock couldn't make out the words.",
+        "cook_landlord": "Adeline Malovega revealed the victim was her landlord.",
+        "marcus_gossip_cleopatra": "Aiden Adams says Alice Oliverae had a breakdown in business negotiations.",
+        "napoleon_gossip_marcus": "Blake Jughashvili says Aiden Adams had personal differences with the victim over power.",
+        "cleopatra_gossip_napoleon": "Alice Oliverae says Blake Jughashvili and the victim had a bad breakup.",
+        "janitor_gossip_cook": "Elliot Luka says Adeline Malovega's landlord was the victim, always demanding rent.",
+        "cook_gossip_janitor": "Adeline Malovega says Elliot Luka was accused of stealing a ring and searched for days.",
+        "patron_gossip_thatcher": "Alexander Hemlock says Nyx Singénero was challenged by the victim and hates being defied.",
+        "nyx_gossip_patron": "Nyx Singénero says Alexander Hemlock went out the front door, not the bathroom.",
+        "aiden_says_alice_promoted": "Aiden Adams claims Alice Oliverae never got the promotion she wanted.",
+        "aiden_says_alice_paycheck": "Aiden Adams says Alice Oliverae's paycheck was docked because of the victim.",
+        "aiden_says_victim_angry": "Aiden Adams says the victim was angry at everyone.",
+        "alice_blake_screenshots": "Alice Oliverae claims Blake Jughashvili sent threatening messages to the victim.",
+        "alice_victim_msg_afraid": "Alice Oliverae says the victim was scared to be here.",
+        "alice_victim_cant_stay_home": "Alice Oliverae says the victim couldn't stay in her apartment.",
+        "blake_nyx_bully": "Blake Jughashvili says Nyx Singénero bullied the victim constantly.",
+        "blake_nyx_called_out": "Blake Jughashvili says Nyx Singénero was humiliated by the victim in public.",
+        "blake_victim_distant": "Blake Jughashvili says the victim had become distant lately.",
+        "nyx_aiden_resented": "Nyx Singénero says Aiden Adams resented the victim for reporting him.",
+        "nyx_alice_promoted_over_victim": "Nyx Singénero says Alice Oliverae leapfrogged the victim for a promotion.",
+        "nyx_victim_didnt_want_return": "Nyx Singénero says the victim didn't want to come back.",
+        "luka_says_cook_threatened": "Elliot Luka says Adeline Malovega threatened to shut the victim up.",
+        "luka_says_patron_was_outside": "Elliot Luka says Alexander Hemlock went outside right before the shot.",
+        "luka_says_ring_was_planted": "Elliot Luka says the ring was planted to frame him.",
+        "adeline_says_janitor_stole_ring": "Adeline Malovega says Elliot Luka stole the ring.",
+        "adeline_says_alice_argued": "Adeline Malovega says Alice Oliverae and the victim had a screaming match.",
+        "adeline_says_victim_was_armed": "Adeline Malovega says the victim carried a knife.",
+        "hemlock_says_blake_threatened": "Alexander Hemlock says Blake Jughashvili was muttering threats.",
+        "hemlock_says_airlock_heard": "Alexander Hemlock says he heard the airlock hiss.",
+        "hemlock_says_nyx_was_calm": "Alexander Hemlock says Nyx Singénero was suspiciously calm.",
     }
-
-    # -- Evidence implication/exoneration labels --
-    EVIDENCE_IMPLICATION = {
-        "aiden_alibi": (["Unknown"], ["Aiden"]),
-        "luka_alibi": (["Unknown"], ["Elliot"]),
-        "blake_alibi": (["Unknown"], ["Blake"]),
-        "blake_alibi_confirmed": (["Unknown"], ["Blake"]),
-        "hemlock_missing": (["Unknown"], ["Alexander"]),
-        "alice_alibi": (["Unknown"], ["Alice"]),
-        "alice_alibi_confirmed": (["Unknown"], ["Alice"]),
-        "adeline_timestamps": (["Unknown"], ["Adeline"]),
-        "adeline_alibi_confirmed": (["Unknown"], ["Adeline"]),
-        "nyx_message": (["Nyx"], []),
-        "unknown_revolver": (["Nyx", "Unknown"], []),
-        "aiden_footprint": (["Unknown"], ["Aiden"]),
-        "blake_witness": (["Nyx"], []),
-        "alice_witness": (["Nyx"], []),
-        "luka_swept": (["Nyx"], []),
-        "adeline_heard": (["Nyx"], []),
-        "hemlock_yelling": (["Nyx"], []),
-        "cook_landlord": (["Adeline"], []),
-        "marcus_gossip_cleopatra": (["Alice"], []),
-        "napoleon_gossip_marcus": (["Aiden"], []),
-        "cleopatra_gossip_napoleon": (["Blake"], []),
-        "janitor_gossip_cook": (["Adeline"], []),
-        "cook_gossip_janitor": (["Elliot"], []),
-        "patron_gossip_thatcher": (["Nyx"], []),
-        "nyx_gossip_patron": (["Alexander"], []),
-        "aiden_says_alice_promoted": (["Alice"], []),
-        "aiden_says_alice_paycheck": (["Alice"], []),
-        "aiden_says_victim_angry": (["Unknown"], []),
-        "alice_blake_screenshots": (["Blake"], []),
-        "alice_victim_msg_afraid": (["Unknown"], []),
-        "alice_victim_cant_stay_home": (["Unknown"], []),
-        "blake_nyx_bully": (["Nyx"], []),
-        "blake_nyx_called_out": (["Nyx"], []),
-        "blake_victim_distant": (["Unknown"], []),
-        "nyx_aiden_resented": (["Aiden"], []),
-        "nyx_alice_promoted_over_victim": (["Alice"], []),
-        "nyx_victim_didnt_want_return": (["Unknown"], []),
-        "luka_says_cook_threatened": (["Adeline"], []),
-        "luka_says_patron_was_outside": (["Alexander"], []),
-        "luka_says_ring_was_planted": (["Elliot"], []),
-        "adeline_says_janitor_stole_ring": (["Elliot"], []),
-        "adeline_says_alice_argued": (["Alice"], []),
-        "adeline_says_victim_was_armed": (["Unknown"], []),
-        "hemlock_says_blake_threatened": (["Blake"], []),
-        "hemlock_says_airlock_heard": (["Unknown"], []),
-        "hemlock_says_nyx_was_calm": (["Nyx"], []),
-        "bullet_casing": (["Nyx"], []),
-        "datachip": (["Nyx"], []),
-        "bloody_cleaver": (["Unknown"], []),
-        "cleaver_analysis": (["Unknown"], []),
-    }
-
-    # -- Evidence aliases (including merged meta-clues) --
-    EVIDENCE_ALIASES = {
-        "payphone log": "aiden_alibi", "phone log": "aiden_alibi", "log": "aiden_alibi", "payphone": "aiden_alibi", "p log": "aiden_alibi",
-        "wet floor sign": "luka_alibi", "floor sign": "luka_alibi", "sheen": "luka_alibi", "wet floor": "luka_alibi",
-        "time-stamped napkin": "blake_alibi", "napkin": "blake_alibi", "blake's napkin": "blake_alibi",
-        "blake confirmed": "blake_alibi_confirmed",
-        "coffee receipt": "hemlock_missing", "receipt": "hemlock_missing", "old receipt": "hemlock_missing",
-        "bus ticket stub": "alice_alibi", "ticket stub": "alice_alibi", "bus ticket": "alice_alibi", "ticket": "alice_alibi", "bus stub": "alice_alibi", "b ticket": "alice_alibi", "bts": "alice_alibi",
-        "alice confirmed": "alice_alibi_confirmed",
-        "stock bucket": "adeline_timestamps", "order docket": "adeline_timestamps", "docket": "adeline_timestamps", "label": "adeline_timestamps",
-        "adeline's alibi confirmed": "adeline_alibi_confirmed", "freezer log": "adeline_alibi_confirmed",
-        "torn paper": "nyx_message", "nyx's letter": "nyx_message", "letter": "nyx_message",
-        "revolver": "unknown_revolver", "gun": "unknown_revolver", "weapon": "unknown_revolver",
-        "footprint": "aiden_footprint", "tracks": "aiden_footprint", "outside tracks": "aiden_footprint",
-        "strong posture witness": "blake_witness", "posture witness": "blake_witness",
-        "argument witness": "alice_witness", "argument": "alice_witness",
-        "determined stride": "luka_swept", "stride": "luka_swept",
-        "adeline heard": "adeline_heard", "woman's voice": "adeline_heard",
-        "hemlock yelling": "hemlock_yelling", "yelling": "hemlock_yelling",
-        "landlord motive": "cook_landlord", "landlord": "cook_landlord",
-        "bullet casing": "bullet_casing", "casing": "bullet_casing",
-        "datachip": "datachip", "chip": "datachip",
-        "bloody cleaver": "bloody_cleaver", "cleaver": "bloody_cleaver",
-        "cleaver analysis": "cleaver_analysis",
-
-        # Merged gossip aliases
-        "alice's motive": ["aiden_says_alice_promoted", "nyx_alice_promoted_over_victim"],
-        "alice's paycheck": ["aiden_says_alice_paycheck"],
-        "marsha's anger": ["aiden_says_victim_angry"],
-        "blake screenshots": ["alice_blake_screenshots"],
-        "marsha scared": ["alice_victim_msg_afraid"],
-        "marsha left apartment": ["alice_victim_cant_stay_home"],
-        "nyx bullying": ["blake_nyx_bully"],
-        "nyx called out": ["blake_nyx_called_out"],
-        "marsha and blake distant": ["blake_victim_distant"],
-        "aiden resented marsha": ["nyx_aiden_resented"],
-        "marsha didn't want return": ["nyx_victim_didnt_want_return"],
-        "cook threatened": ["luka_says_cook_threatened"],
-        "patron outside": ["luka_says_patron_was_outside"],
-        "ring planted": ["luka_says_ring_was_planted"],
-        "janitor stole ring": ["adeline_says_janitor_stole_ring"],
-        "alice argued": ["adeline_says_alice_argued"],
-        "marsha armed": ["adeline_says_victim_was_armed"],
-        "blake threatened": ["hemlock_says_blake_threatened"],
-        "airlock heard": ["hemlock_says_airlock_heard"],
-        "nyx calm": ["hemlock_says_nyx_was_calm"],
-    }
-
-    # -- Evidence verification lines (scanner/database flavor) --
-    EVIDENCE_VERIFY = {
-        "aiden_alibi": "You scan the payphone log. Seconds later you get a ping, and unsurprisingly it is a real log. Why anyone would fake a payphone log, or more to the point, how, you don't know, but it never hurts to be careful.",
-        "luka_alibi": None,
-        "blake_alibi": "You scan the napkin and upload it to the handwriting database. Moments later, you get a confirmation that it is in fact Blake's handwriting. This is definitely his work, although you still can't verify the timestamp.",
-        "blake_alibi_confirmed": "Blake's alibi holds up under scrutiny. The handwriting matches and the timeline is plausible.",
-        "hemlock_missing": "You know a diner receipt when you see it, although that still doesn't account for Hemlock's whereabouts.",
-        "alice_alibi": "You scan the bus ticket. Instantly, you get a ping confirming the legitimacy. It's definitely an officially issued ticket. Although, it never hurts to be careful.",
-        "alice_alibi_confirmed": "The transit database confirms Alice was on that bus. Her alibi is airtight.",
-        "adeline_timestamps": "You scan the label and compare it to the handwriting database. It's definitely a match for Adeline.",
-        "adeline_alibi_confirmed": "Freezer logs confirm Adeline was inside at the time of death. She's exonerated.",
-        "nyx_message": "You scan the letter fragment. Unfortunately, the database isn't able to get enough of the message to fully confirm or deny the match to Nyx. You'll have to think on this.",
-        "unknown_revolver": "You scan the weapon for fingerprints, but nothing shows up. Curiously, not even the gunshot residue that normally accompanies a fired weapon is present. It's been thoroughly cleaned, probably by the killer.",
-        "aiden_footprint": "You squint your eyes. There isn't much you can do from this side of the door, and you aren't equipped to go for a space-walk. You'll have to think on this.",
-        "blake_witness": None,
-        "alice_witness": None,
-        "luka_swept": None,
-        "adeline_heard": None,
-        "hemlock_yelling": None,
-        "cook_landlord": None,
-        "marcus_gossip_cleopatra": None,
-        "napoleon_gossip_marcus": None,
-        "cleopatra_gossip_napoleon": None,
-        "janitor_gossip_cook": None,
-        "cook_gossip_janitor": None,
-        "patron_gossip_thatcher": None,
-        "nyx_gossip_patron": None,
-        "aiden_says_alice_promoted": None,
-        "aiden_says_alice_paycheck": None,
-        "aiden_says_victim_angry": None,
-        "alice_blake_screenshots": None,
-        "alice_victim_msg_afraid": None,
-        "alice_victim_cant_stay_home": None,
-        "blake_nyx_bully": None,
-        "blake_nyx_called_out": None,
-        "blake_victim_distant": None,
-        "nyx_aiden_resented": None,
-        "nyx_alice_promoted_over_victim": None,
-        "nyx_victim_didnt_want_return": None,
-        "luka_says_cook_threatened": None,
-        "luka_says_patron_was_outside": None,
-        "luka_says_ring_was_planted": None,
-        "adeline_says_janitor_stole_ring": None,
-        "adeline_says_alice_argued": None,
-        "adeline_says_victim_was_armed": None,
-        "hemlock_says_blake_threatened": None,
-        "hemlock_says_airlock_heard": None,
-        "hemlock_says_nyx_was_calm": None,
-        "bullet_casing": "You open the revolver, pull out the casing, and drop it into the slot. It's a perfect fit. This bullet was definitely fired from this gun. That much is obvious.",
-        "datachip": "You plug the chip into your scanner and wait for the data to transfer. A few seconds later a notification appears:\n\"ENCRYPTED DATA\"\nYou select the option to decrypt. There's no telling when, or even if, this will finish anytime soon. You put everything away and take a deep breath. Just as your hands return to your sides, you hear a ping and pull your scanner back out of your pocket to see the screen\nEst. Decryption: 13h47m18s\nWell, that's not good. You'll have to figure something else out after all.",
-        "bloody_cleaver": "You scan the cleaver, first for DNA then for prints. The prints match Adeline. She definitely handled it.",
-        "cleaver_analysis": "Further analysis confirms the blood is lab‑meat juice, not human. Adeline's story checks out.",
-    }
-
-    # -- Tamper/plant actions --
-    TAMPER_ACTIONS = {
-        "aiden_alibi": ("destroy", "You tear up the payphone log and drop it into the trash. Who cares? Not you."),
-        "luka_alibi": ("destroy", "You drag your shoes across the floor leaving streaks. The floor is no longer clean. Maybe it was never clean."),
-        "blake_alibi": ("destroy", "You tear the napkin to shreds and toss it into the trash. It's not like it'll make a difference. You're the one who makes the difference."),
-        "hemlock_missing": ("destroy", "You snap open your lighter and flick. Holding the receipt over the flame causes it to flash into a puff of smoke. It's not like it was that important anyway."),
-        "alice_alibi": ("destroy", "You snap open your lighter and flick the wheel. The ticket-stub burns to a crispy carbon finish and its ashes scatter across the diner. Who cares?"),
-        "adeline_timestamps": ("destroy", "You wipe the bucket with a wet rag. The label dissolves almost instantly. It's like it was never there."),
-        "adeline_alibi_confirmed": ("destroy", "You tear the sheet into tiny pieces and stuff them into your pocket. As far as you're concerned, there never was a log sheet."),
-        "nyx_message": ("destroy", "You eat the scrap of paper quickly, swallowing with some difficulty, but you get it down. The only way to get it back would require cops to do the one thing they never do: truly investigate one of their own."),
-        "unknown_revolver": ("plant", "You plant the revolver on {suspect} carefully and quietly. Whenever the police drone gets here, it'll be they who goes down for it."),
-        "bullet_casing": ("plant", "You plant the spent round on {suspect}. It may not be enough, but it's something. You just need a conviction, not necessarily justice."),
-        "bloody_cleaver": ("plant", "You plant the cleaver on {suspect}. It may not be enough, but it's something. After all, you only need a conviction, not necessarily justice."),
-        "datachip": ("destroy", "You smash the data chip on the ground beneath your heel. Pieces scatter in every direction. If it wasn't unusable before, it sure as shit is now."),
-        "alice_blake_screenshots": ("destroy", "You delete the screenshots. It's not like you cared about any of that drama anyway."),
-    }
-
-    def evidence_display_name(clue_id):
-        return EVIDENCE_DESCRIPTIONS.get(clue_id, clue_id).split('.')[0].strip()
-
-    def is_misleading(clue_id):
-        for v in MISLEADING_CLUES.values():
-            if clue_id in v:
-                return True
-        return False
 
     def hud():
         print(RED + BLACK_BG + "╔══ HUD ═══════════════════════════════════════════╗")
@@ -662,7 +458,8 @@ def play_game():
     def add_evidence(ev_id):
         if ev_id not in clues:
             clues.add(ev_id)
-            print(f"{RED}📋 Evidence: {evidence_display_name(ev_id)} ({len(clues)}/{TOTAL_NON_MISLEADING}){RESET}")
+            desc = EVIDENCE_DESCRIPTIONS.get(ev_id, ev_id)
+            print(f"{RED}📋 Evidence ({len(clues)}/{TOTAL_NON_MISLEADING}): {desc}{RESET}")
             player["xp"] += 1
             if player["xp"] >= player["xp_to_next"]:
                 level_up()
@@ -670,7 +467,7 @@ def play_game():
     def remove_evidence(ev_id):
         if ev_id in clues:
             clues.remove(ev_id)
-            print(f"{RED}📋 Evidence lost: {evidence_display_name(ev_id)} ({len(clues)}/{TOTAL_NON_MISLEADING}){RESET}")
+            print(f"{RED}📋 Evidence lost: {ev_id} ({len(clues)}/{TOTAL_NON_MISLEADING}){RESET}")
 
     def level_up():
         player["level"] += 1
@@ -717,20 +514,17 @@ def play_game():
         desc = loc["desc"]
         if current_location == "dining" and revolver_found:
             desc += "\nThe napkin dispenser is empty – you already liberated its secret."
-        if current_location == "office":
-            if bullet_found_in_office:
-                desc += "\nA spent bullet casing glints under the desk."
+        if current_location == "office" and "nyx_message" in clues:
+            desc += "\nThe torn paper is gone. Its absence feels louder than its presence."
         if current_location == "bathroom" and body_examined:
             desc += "\nThe body remains, patient as only the dead can be."
-            if bathroom_panel_revealed:
-                desc += "\nA loose panel behind the toilet hints at secrets."
         sus_keys = loc.get("suspects", [])
         for sus_key in sus_keys:
             s = suspects[sus_key]
             if s["exonerated"]:
                 desc += f"\n\n{get_first_name(s['name'])} is here, but they've been completely exonerated. Not worth your time."
             elif s["alive"] and not s["detained"] and not s["defeated"]:
-                desc += f"\n\n{get_first_name(s['name'])} is here. Trust: {trust[sus_key]}/3 – fragile as a soap bubble."
+                desc += f"\n\n{get_first_name(s['name'])} is here. Trust: {trust[sus_key]}/3 – {TRUST_PHRASES[trust[sus_key]]}."
                 desc += f"\nPolitical lean: {s['lean']}"
             elif s["detained"]:
                 desc += f"\n\n{get_first_name(s['name'])} is handcuffed, radiating silent fury."
@@ -740,20 +534,16 @@ def play_game():
 
     def move(direction):
         nonlocal current_location
-        if direction == "freezer":
-            if not freezer_unlocked:
-                print("The freezer door is locked tight. Maybe there's a reason to check in here...")
-                return
         if direction in locations:
             current_location = direction
             clear_screen()
             hud()
             describe_location()
         else:
-            print("Not a room. Try: counter, dining, kitchen, office, bathroom, freezer.")
+            print("Not a room. Try: counter, dining, kitchen, office, bathroom.")
 
     def search():
-        nonlocal revolver_found, bullet_found_in_office, bathroom_panel_revealed, freezer_unlocked, freezer_cleaver_found, label_taken
+        nonlocal revolver_found
         loc = locations[current_location]
         if current_location == "dining" and loc.get("hidden_revolver") and not revolver_found:
             revolver_found = True
@@ -761,27 +551,11 @@ def play_game():
             print("In Plain View: cold metal made for someone with even colder blood; a revolver. It's definitely recently fired – the barrel still whispers gunpowder to anyone who will pay attention.")
             add_evidence("unknown_revolver")
             return
-        if current_location == "office" and revolver_found and not bullet_found_in_office:
-            bullet_found_in_office = True
-            print("A spent bullet casing, half hidden beneath the desk. It matches the revolver's calibre.")
-            add_evidence("bullet_casing")
+        if current_location == "office" and "nyx_message" not in clues:
+            inventory.append("torn thesis")
+            add_evidence("nyx_message")
+            print(f"Torn paper. {suspects[RESERVED_KEY_THX1138]['name']}'s handwriting. Hard to make out what was said here, but by the looks of phrases like \"per my last query\", \"as you can see\", and at least one use of the word asinine in the corner like a watermark where the rip begins at the bottom – this is clearly an angry letter preceded by at least a couple more.")
             return
-        if current_location == "bathroom" and bathroom_panel_revealed and not locations["bathroom"]["datachip_found"]:
-            locations["bathroom"]["datachip_found"] = True
-            print("You pry open the loose panel. Inside: a datachip, cold and unmarked.")
-            add_evidence("datachip")
-            inventory.append("datachip")
-            return
-        if current_location == "freezer":
-            if not freezer_cleaver_found and "cook_landlord" in talk_history:
-                freezer_cleaver_found = True
-                print("Buried under synth-crab: a cleaver stained with something dark and ominous.")
-                add_evidence("bloody_cleaver")
-                return
-            elif "adeline_timestamps" in clues and "adeline_alibi_confirmed" not in clues:
-                add_evidence("adeline_alibi_confirmed")
-                print("A log sheet on the freezer door confirms Adeline was inside at the time of the murder. Solid alibi.")
-                return
         if current_location == "counter" and "aiden_alibi" not in clues:
             print("Payphone log. Aiden was on a call at time of death. It's hard to be in two places at once, but you've seen stranger things.")
             add_evidence("aiden_alibi")
@@ -811,119 +585,53 @@ def play_game():
             print("A stock bucket with a timestamped order docket. Adeline's alibi checks out, at least on the surface.")
             add_evidence("adeline_timestamps")
             trust_change("cook", 1)
-            freezer_unlocked = True
-            print("Adeline hands you the freezer key. 'Here, have a look if you want.'")
-            return
-        if current_location == "office" and "nyx_message" not in clues:
-            inventory.append("torn thesis")
-            add_evidence("nyx_message")
-            print(f"Torn paper. {suspects[RESERVED_KEY_THX1138]['name']}'s handwriting. Hard to make out... clearly an angry letter preceded by at least a couple more.")
             return
         print("Nothing. Nothing worth mentioning anyway, just grease, despair, and the miasma of mystery.")
 
     def examine(item):
-        nonlocal body_examined, bathroom_panel_revealed
+        nonlocal body_examined
         if item == "body" and current_location == "bathroom":
             if not body_examined:
                 body_examined = True
                 print("The victim appears to be between the ages of 25 and 30. Feminine. Clothes are in tact, the wallet is in hand. From the look of it, it doesn't seem it ever left her fist. She's approximately 5 feet tall. Her makeup is done, smeared only from the blood. For a brief moment, you wonder what foundation she used. You've only ever heard of makeup smudging in old films.\n\nThe victim's face: mild surprise. Death wasn't so much terrifying as much as it was rude. Between the eyes is a bullet wound: neat, centered, professional even. Someone knew what they were doing.")
             else:
                 print("The body remains. It hasn't changed. Corpses rarely do.")
-                if not bathroom_panel_revealed and trust["janitor"] >= 3:
-                    bathroom_panel_revealed = True
-                    print("You notice something new: a loose panel behind the toilet. The janitor must have mentioned it.")
-            return
-        if item == "corkboard" and current_location == "kitchen":
+        elif item == "corkboard" and current_location == "kitchen":
             print("The corkboard is a collage of fading schedules, a yellowed menu, and a crisp flier for 'Reyes Properties'. The same name as on the victim's ID, if you've seen it.")
             if "galactic_id" in inventory or "signet ring" in inventory:
                 print("The connection clicks: the victim owned the complex where Adeline lives.")
-            return
-        if item == "freezer" and current_location == "kitchen":
-            if freezer_unlocked:
-                print("The walk-in freezer hums softly. You can now enter it properly. Try 'go freezer'.")
-            else:
-                print("The walk-in freezer door is locked. You'd need a reason to open it.")
-            return
-        if item in ["signet ring", "galactic_id"] and item in locations[current_location]["items"]:
+        elif item == "freezer" and current_location == "kitchen":
+            print("The walk-in freezer hums softly. Stacked inside are bulk ingredients, a half-empty case of synth-crab, and a stock bucket with a timestamped order docket pinned to its lid.")
+            if "adeline_timestamps" not in clues:
+                add_evidence("adeline_timestamps")
+                trust_change("cook", 1)
+        elif item in ["signet ring", "galactic_id"] and item in locations[current_location]["items"]:
             if item == "signet ring":
-                print("A heavy silver ring, engraved with the initials E.R. It feels cold and important.")
+                print("A heavy silver ring, engraved with the initials E.R. It feels cold and important. You can take it.")
             else:
-                print("The ID reads 'E. Reyes' with a photo of the victim. The address lists a building complex owned by a shell company.")
-            inventory.append(item)
-            locations[current_location]["items"].remove(item)
-            return
-        if item == "poison vial" and item in locations[current_location]["items"]:
-            print("A small vial of clear liquid. It smells faintly of almonds. Cyanide, maybe. Or just bad coffee syrup.")
-            inventory.append(item)
-            locations[current_location]["items"].remove(item)
-            return
-        if item == "notepad":
+                print("The ID reads 'E. Reyes' with a photo of the victim. The address lists a building complex owned by a shell company. You can take it.")
+        elif item == "poison vial" and item in locations[current_location]["items"]:
+            print("A small vial of clear liquid. It smells faintly of almonds. Cyanide, maybe. Or just bad coffee syrup. You can take it.")
+        elif item == "notepad":
             show_notepad()
-            return
-
-        # Evidence lookup via aliases
-        ev_id = EVIDENCE_ALIASES.get(item.lower())
-        if ev_id is None:
-            if item in EVIDENCE_DESCRIPTIONS:
-                ev_id = item
-        if ev_id:
-            desc = EVIDENCE_DESCRIPTIONS.get(ev_id, "No description.")
-            impl, exon = EVIDENCE_IMPLICATION.get(ev_id, (["Unknown"], []))
-            impl_str = ", ".join(impl) if impl else "None"
-            exon_str = ", ".join(exon) if exon else "None"
-            print(f"{desc}\nImplicates: {impl_str}\nExonerates: {exon_str}")
-            verify = EVIDENCE_VERIFY.get(ev_id)
-            if verify is not None:
-                print(verify)
-                # Auto-add confirmed alibis if scanner verifies them
-                if ev_id == "blake_alibi" and "blake_alibi_confirmed" not in clues:
-                    add_evidence("blake_alibi_confirmed")
-                if ev_id == "alice_alibi" and "alice_alibi_confirmed" not in clues:
-                    add_evidence("alice_alibi_confirmed")
-            return
-        print(f"You give the {item} a good look over. It's definitely a {item}. What were you expecting?")
+        elif item in EVIDENCE_DESCRIPTIONS:
+            desc = EVIDENCE_DESCRIPTIONS[item]
+            print(f"{desc}")
+        else:
+            print(f"You give the {item} a good look over. It's definitely a {item}. What were you expecting?")
 
     def show_notepad():
         if not clues:
             print("The notepad is empty. Nothing to review yet.")
         else:
             print("─── NOTEPAD ───")
-            # Group by meta-clue for display
-            shown_meta = set()
             for c in sorted(clues):
-                # find meta key if this is a sub-clue
-                meta = None
-                for alias, ids in EVIDENCE_ALIASES.items():
-                    if isinstance(ids, list) and c in ids:
-                        meta = alias
-                        break
-                if meta:
-                    if meta not in shown_meta:
-                        shown_meta.add(meta)
-                        name = meta
-                        sources = [evidence_display_name(sc) for sc in ids if sc in clues]
-                        combined_desc = f"  • {name}  [Sources: {', '.join(sources)}]"
-                        if any(is_misleading(sc) for sc in ids):
-                            combined_desc = f"  {GRAY}• {name} (suspicious)  [Sources: {', '.join(sources)}]{RESET}"
-                        print(combined_desc)
-                else:
-                    name = evidence_display_name(c)
-                    impl, exon = EVIDENCE_IMPLICATION.get(c, (["Unknown"], []))
-                    impl_str = ", ".join(impl) if impl else "None"
-                    exon_str = ", ".join(exon) if exon else "None"
-                    line = f"  • {name}  [Implicates: {impl_str}; Exonerates: {exon_str}]"
-                    if is_misleading(c):
-                        line = f"  {GRAY}• {name} (suspicious)  [Implicates: {impl_str}; Exonerates: {exon_str}]{RESET}"
-                    print(line)
+                desc = EVIDENCE_DESCRIPTIONS.get(c, "No description available.")
+                print(f"  • {c}: {desc}")
             print("───────────────")
 
     def take(item):
         loc = locations[current_location]
-        if item == "label" and "label" in loc["items"]:
-            loc["items"].remove("label")
-            inventory.append("label")
-            print("You peel the label off the container. Hopefully, Adeline won't notice. She seems harmless, but if she isn't, she's truly unstable.")
-            return
         if item in loc["items"]:
             loc["items"].remove(item)
             inventory.append(item)
@@ -933,7 +641,7 @@ def play_game():
             print("It's not here. Maybe it was never here. Maybe nothing is.")
 
     def talk(sus):
-        nonlocal nyx_escape_offered, freezer_unlocked
+        nonlocal nyx_escape_offered
         if not sus:
             print("Who did you want to talk to? Try: Aiden, Blake, Alice, Nyx, Elliot, Adeline, Alexander (or their last names).")
             return
@@ -962,15 +670,14 @@ def play_game():
             return
 
         print(f"\n{RED}You approach {get_first_name(s['name'])}. The air shifts.{RESET}")
-        print(f"Trust: {trust[sus]}/3 | Lean: {s['lean']}")
+        print(f"Trust: {trust[sus]}/3 – {TRUST_PHRASES[trust[sus]]} | Lean: {s['lean']}")
         if trust[sus] == 3 and revealed_characteristic[sus] not in traits_revealed:
             reveal_characteristic(sus)
 
         if sus == "cook" and trust[sus] >= 2:
             if "cook_landlord" not in talk_history:
                 talk_history["cook_landlord"] = True
-                print(f"{get_first_name(s['name'])} suddenly blurts out: 'Marsha... she was my landlord. Always hounding me for rent. Can you believe it?'")
-                freezer_unlocked = True
+                print(f"{get_first_name(s['name'])} suddenly blurts out: 'The victim... she was my landlord. Always hounding me for rent. Can you believe it?'")
 
         if sus == RESERVED_KEY_THX1138 and trust[sus] == 3 and not nyx_escape_offered:
             nyx_escape_offered = True
@@ -1051,9 +758,7 @@ def play_game():
                         add_evidence("luka_alibi")
                         trust_change("janitor", 1)
                 elif sus == "cook":
-                    print("'I was prepping vegetables when the shit hit the fan. The stock bucket label is all time‑stamped. Please, take the label and check it out. Alice and I were chatting after she finished her call.'")
-                    freezer_unlocked = True
-                    print("She hands you the freezer key.")
+                    print("'I was prepping vegetables when the shit hit the fan. The stock bucket is all time‑stamped. Please, check them out. Alice and I were chatting after she finished her call.'")
                     if "adeline_timestamps" not in clues:
                         add_evidence("adeline_timestamps")
                         trust_change("cook", 1)
@@ -1078,8 +783,8 @@ def play_game():
                 if sus == RESERVED_KEY_THX1138:
                     print(f"They snatch it back before you can put it away. '{curse}!'")
                     trust_change(sus, -1)
-                    if "torn thesis" in inventory:
-                        inventory.remove("torn thesis")
+                    if "nyx_message" in inventory:
+                        inventory.remove("nyx_message")
             elif topic == "the revolver":
                 if sus == RESERVED_KEY_THX1138:
                     print(f"For a moment, but just a moment, something flickers; their face an old neon sign on its last leg that hardly says anything completely. 'Never seen it before, detective.' The lie is obvious, but not why.")
@@ -1093,7 +798,7 @@ def play_game():
                 add_evidence("blake_witness")
                 trust_change("napoleon", 1)
             elif topic == "the argument" and sus == "cleopatra":
-                print(f"'I heard loud voices from the office. {suspects[RESERVED_KEY_THX1138]['name']} and Marsha. Nothing civil about it, but then, when are *they* ever civil? '")
+                print(f"'I heard loud voices from the office. {suspects[RESERVED_KEY_THX1138]['name']} and the victim. Nothing civil about it, but then, when are *they* ever civil? '")
                 add_evidence("alice_witness")
                 trust_change("cleopatra", 1)
             elif topic == "the floor" and sus == "janitor":
@@ -1164,7 +869,7 @@ def play_game():
 
     def detain(sus):
         nonlocal handcuffs
-        if not cheat_unlimited_cuffs and handcuffs <= 0:
+        if handcuffs <= 0:
             print("You reach for your cuffs and find no more.")
             return
         if not sus:
@@ -1187,11 +892,9 @@ def play_game():
         if sus not in loc_suspects:
             print("They're not in here and ain't telekinetic. Not yet, anyway.")
             return
-        if not cheat_unlimited_cuffs:
-            handcuffs -= 1
+        handcuffs -= 1
         s["detained"] = True
-        remaining = "∞" if cheat_unlimited_cuffs else handcuffs
-        print(f"Click-click-click-click. {get_first_name(s['name'])} now sports a used set of state-issued jewelry. {remaining} remaining.")
+        print(f"Click-click-click-click. {get_first_name(s['name'])} now sports a used set of state-issued jewelry. {handcuffs} remaining.")
         if sfx_queue: sfx_queue.put('cuffs')
 
     def fight(sus):
@@ -1222,8 +925,6 @@ def play_game():
         print(f"\n{RED}⚔ The air is electric. You and {get_first_name(s['name'])} circle the area like binary stars on a collision course. There may yet be another murder. At least it'll be easy to solve.{RESET}")
         if sfx_queue: sfx_queue.put('fight')
         while player["hp"] > 0 and s["hp"] > 0:
-            if cheat_god_mode:
-                player["hp"] = player["max_hp"]
             print(f"\nYour HP: {player['hp']}/{player['max_hp']} | {get_first_name(s['name'])} HP: {s['hp']}")
             print("1. Calculated strike  2. Desperate swing  3. Tactical retreat")
             act = input("> ").strip()
@@ -1260,8 +961,6 @@ def play_game():
                 check_total_carnage()
                 return
             edmg = random.randint(3, 6)
-            if cheat_god_mode:
-                edmg = 0
             player["hp"] -= edmg
             print(f"{get_first_name(s['name'])} strikes back. {edmg} damage. You see murder in their eyes.")
             if player["hp"] <= 0:
@@ -1274,56 +973,10 @@ def play_game():
         if all(suspects[k]["defeated"] for k in suspects):
             ending_carnage()
 
-    def tamper(item, suspect=None):
-        nonlocal corruption_planted
-        # Determine if item is an alias or direct ID
-        ev_id = EVIDENCE_ALIASES.get(item.lower())
-        if ev_id is None:
-            if item in EVIDENCE_DESCRIPTIONS:
-                ev_id = item
-        if ev_id is None or ev_id not in TAMPER_ACTIONS:
-            print("That item can't be tampered with.")
-            return
-        action_type, msg = TAMPER_ACTIONS[ev_id]
-        if action_type == "destroy":
-            if ev_id in clues:
-                remove_evidence(ev_id)
-            else:
-                print("You don't have that evidence.")
-                return
-            print(msg)
-        elif action_type == "plant":
-            if not suspect:
-                print("You need to specify a suspect to plant on. Use 'tamper revolver on Alice'")
-                return
-            resolved = resolve_suspect(suspect)
-            if not resolved:
-                print("Invalid suspect.")
-                return
-            # Remove item from inventory if present, or mark as planted
-            if ev_id == "unknown_revolver" and "revolver" in inventory:
-                inventory.remove("revolver")
-            elif ev_id == "bullet_casing" and "bullet_casing" not in inventory:
-                print("You don't have the bullet casing.")
-                return
-            elif ev_id == "bloody_cleaver" and "bloody_cleaver" not in inventory:
-                print("You don't have the cleaver.")
-                return
-            # Set corruption planted
-            corruption_planted = resolved
-            print(msg.format(suspect=get_first_name(suspects[resolved]['name'])))
-
     def accuse(sus):
-        nonlocal handcuffs, corruption_planted
+        nonlocal handcuffs
         if not sus:
             print("Accuse who? Make up your mind, detective.")
-            return
-        if sus.startswith("tamper "):
-            parts = sus[7:].split(" on ")
-            if len(parts) == 2 and parts[1].strip():
-                tamper(parts[0].strip(), parts[1].strip())
-            else:
-                tamper(parts[0].strip())
             return
         resolved = resolve_suspect(sus)
         if resolved:
@@ -1332,37 +985,29 @@ def play_game():
             print(f"'{sus}' doesn't match anyone. Try: Aiden, Blake, Alice, Nyx, Elliot, Adeline, Alexander.")
             return
         if sfx_queue: sfx_queue.put('accuse')
-        if sus == "cook" and not suspects["cook"]["exonerated"] and not suspects["cook"]["detained"] and not suspects["cook"]["defeated"]:
-            print("Adeline's eyes widen. 'You think it was me? No, no, no...' She bolts for the back door!")
-            print("She escapes into the void before you can react. The case just got harder.")
-            suspects["cook"]["alive"] = False
-            suspects["cook"]["escaped"] = True
-            return
-        if nyx_escaped and corruption_planted and sus == corruption_planted:
-            corruption_ending()
-            return
         if sus != RESERVED_KEY_THX1138 and suspects[RESERVED_KEY_THX1138]["detained"]:
             secret_ending()
             return
         if sus != RESERVED_KEY_THX1138:
             ending_fail()
             return
+
         if len(clues.intersection(incriminating)) < required_incriminating:
             print(f"{get_first_name(suspects[RESERVED_KEY_THX1138]['name'])} smirks. 'Let's say I did. Who in Existence would believe you? You've got nothing on me.'")
             return
+
         if suspects[RESERVED_KEY_THX1138]["detained"]:
             ending_correct()
             return
+
         print(f"\nYou point at {get_first_name(suspects[RESERVED_KEY_THX1138]['name'])}. 'You.' The word hangs like a bullet; slipping behind their eyes and through their mental folds as the realization dawns on them. You're pointing at them, and you're not backing down.")
         print(f"You both notice at the same time: they're unrestrained. '{player_name}, you absolute fool!' They lunge.")
         fight(RESERVED_KEY_THX1138)
         if suspects[RESERVED_KEY_THX1138]["defeated"] and not suspects[RESERVED_KEY_THX1138]["detained"]:
-            if cheat_unlimited_cuffs or handcuffs > 0:
-                if not cheat_unlimited_cuffs:
-                    handcuffs -= 1
+            if handcuffs > 0:
+                handcuffs -= 1
                 suspects[RESERVED_KEY_THX1138]["detained"] = True
-                rem = "∞" if cheat_unlimited_cuffs else handcuffs
-                print(f"You slap the cuffs on {get_first_name(suspects[RESERVED_KEY_THX1138]['name'])}. {rem} remaining. Justice never tasted so bloody and sweet. Good job, detective. They're sure to tell stories of this one at the station.")
+                print(f"You slap the cuffs on {get_first_name(suspects[RESERVED_KEY_THX1138]['name'])}. {handcuffs} remaining. Justice never tasted so bloody and sweet. Good job, detective. They're sure to tell stories of this one at the station.")
             else:
                 print("You don't have any cuffs left, but they're out cold. The police drone will handle it. Probably. You light a smoke and watch over them making sure they're still breathing ready to issue another state-sanctioned beat-down if necessary.")
             ending_correct()
@@ -1385,20 +1030,9 @@ def play_game():
         sys.exit(0)
 
     def nyx_escape_ending():
-        nonlocal nyx_escaped
-        print("Nyx parts their lips once more to reveal their toxic solvent-based smile. Their eyes flash the recognition that's only ever shared between two predators in league with each other. You immediately begin to consider how you'll spin this to the police drone. But perhaps there's another way...")
-        nyx_escaped = True
-        suspects[RESERVED_KEY_THX1138]["alive"] = False
-        suspects[RESERVED_KEY_THX1138]["exonerated"] = False
-        print("Nyx vanishes through the back office. The airlock cycles. You're alone with the mess and a choice.")
-        print("You can plant the revolver on someone and accuse them to close the case. Dirty, but effective.")
-
-    def corruption_ending():
         nonlocal game_over
         if sfx_queue: sfx_queue.put('gameover')
-        print(f"You plant the revolver and make your accusation. The frame holds. The police drone accepts your report without question.")
-        print("A dirty cop ending. Justice is served cold, and you're the one holding the freezer door open.")
-        print(f"{RED}GAME OVER – CORRUPTION ENDING{RESET}")
+        print("Nyx parts their lips once more to reveal their toxic solvent-based smile. Their eyes flash the recognition that's only ever shared between two predators in league with each other. You immediately begin to consider how you'll spin this to the police drone. You scratch your notepad with fervor and get to work destroying the evidence. Why you did this, only you'll ever know, and let's hope it doesn't haunt you any longer than it takes to finish a bottle of absinthe. Few things ever do.\n\nGAME OVER")
         game_over = True
         sys.exit(0)
 
@@ -1407,7 +1041,7 @@ def play_game():
         if sfx_queue: sfx_queue.put('jaildoor')
         k = suspects[RESERVED_KEY_THX1138]
         print(f"\n{RED}Everything clicks into place. The whole crooked design.{RESET}")
-        print(f"'{get_first_name(k['name'])}, in the office, with the revolver. Marsha Stone killed in cold blood. For ego? For fun? For the oldest reason there ever was: because you could.'")
+        print(f"'{get_first_name(k['name'])}, in the office, with the revolver. Victim killed in cold blood. For ego? For fun? For the oldest reason there ever was: because you could.'")
         print(f"{get_first_name(k['name'])} deflates like a punctured flight suit. 'Yes, you meddling {random.choice(k['curses'])}. Fine! I did it. And I'd do it again. I'd do it all again without a second damn thought.'")
         print("The confession hangs in the air, hideous and undeniable. You make your notes.")
         for sus in suspects:
@@ -1447,7 +1081,7 @@ def play_game():
 
     def countenance():
         nonlocal countenance_used, handcuffs, required_incriminating
-        if not cheat_infinite_countenance and countenance_used:
+        if countenance_used:
             print("You've already called upon your Countenance. The moment has passed.")
             return
         countenance_used = True
@@ -1525,59 +1159,10 @@ def play_game():
                         print(f"(Required incriminating evidence now {required_incriminating})")
         else:
             print("Your Countenance manifests in an unexpected way. Nothing happens.")
-        if cheat_infinite_countenance:
-            countenance_used = False
 
     def show_inventory():
-        ev_list = '\n'.join(f' - {evidence_display_name(e)}' for e in sorted(clues)) if clues else "You've got nothing. The void stares back. Don't blink."
+        ev_list = '\n'.join(f' - {e}' for e in sorted(clues)) if clues else "You've got nothing. The void stares back. Don't blink."
         print(f"Inventory: {', '.join(inventory) if inventory else 'empty pockets'}\nCuffs: {handcuffs}/3\nHP: {player['hp']}/{player['max_hp']}\n\nEvidence ({len(clues)}/{TOTAL_NON_MISLEADING}):\n{ev_list}")
-
-    # -- Theory command --
-    def theory(sus):
-        resolved = resolve_suspect(sus)
-        if resolved:
-            sus = resolved
-        if sus not in suspects:
-            print("Unknown suspect for theory.")
-            return
-        s = suspects[sus]
-        name = get_first_name(s['name'])
-        print(f"{name}.")
-        # Motives
-        if sus in MOTIVE_GOSSIP:
-            target, gossip_text, _ = MOTIVE_GOSSIP[sus]
-            print(f"Known motives: {s['motive']} (Also: {gossip_text})")
-        else:
-            print(f"Known motives: {s['motive']}")
-        # Evidence for/against
-        evidence_for = []
-        evidence_against = []
-        for ev_id in clues:
-            if ev_id in EVIDENCE_IMPLICATION:
-                impl, exon = EVIDENCE_IMPLICATION[ev_id]
-                if name in impl:
-                    evidence_for.append(evidence_display_name(ev_id))
-                if name in exon:
-                    evidence_against.append(evidence_display_name(ev_id))
-        print(f"Evidence for {name}: {', '.join(evidence_for) if evidence_for else 'none'}")
-        print(f"Evidence against {name}: {', '.join(evidence_against) if evidence_against else 'none'}")
-        # Alibi
-        alibi_map = {
-            "marcus": "aiden_alibi",
-            "napoleon": "blake_alibi",
-            "cleopatra": "alice_alibi",
-            "janitor": "luka_alibi",
-            "cook": "adeline_timestamps",
-            "patron": "hemlock_missing",
-            RESERVED_KEY_THX1138: None
-        }
-        alibi_id = alibi_map.get(sus)
-        if alibi_id and alibi_id in clues and not is_misleading(alibi_id):
-            print("Alibi: Yes")
-        elif alibi_id is None:
-            print("Alibi: None presented")
-        else:
-            print("Alibi: No")
 
     EASTER_EGG_PHRASE = "Im an existentialist-absurdist-gnostic-agnostic-secular-true path unitarian-marxist-leninist-maoist multi-level marketer."
 
@@ -1586,7 +1171,7 @@ def play_game():
         'th': 'threaten', 'd': 'detain', 'f': 'fight', 'a': 'accuse',
         'i': 'inventory', 'inv': 'inventory', 'h': 'help', '?': 'help',
         'q': 'quit', 'x': 'examine', 'c': 'countenance', 'r': 'read',
-        'v': 'theory', 'tamper': 'tamper'
+        'take': 'take', 'p': 'take', 'grab': 'take', 'pick': 'take'
     }
 
     def expand_command(raw):
@@ -1599,63 +1184,57 @@ def play_game():
         parts = raw.split()
         first = parts[0].lower()
         if first in shortcuts:
-            shortcut = shortcuts[first]
-            if shortcut == 'go':
+            if first in ('g', 'go'):
                 return f"go {' '.join(parts[1:])}" if len(parts) > 1 else "go"
-            elif shortcut == 'talk':
+            elif first in ('t', 'talk'):
                 return f"talk {' '.join(parts[1:])}" if len(parts) > 1 else "talk"
-            elif shortcut == 'threaten':
+            elif first in ('th', 'threaten'):
                 return f"threaten {' '.join(parts[1:])}" if len(parts) > 1 else "threaten"
-            elif shortcut == 'detain':
+            elif first in ('d', 'detain'):
                 return f"detain {' '.join(parts[1:])}" if len(parts) > 1 else "detain"
-            elif shortcut == 'fight':
+            elif first in ('f', 'fight'):
                 return f"fight {' '.join(parts[1:])}" if len(parts) > 1 else "fight"
-            elif shortcut == 'accuse':
+            elif first in ('a', 'accuse'):
                 return f"accuse {' '.join(parts[1:])}" if len(parts) > 1 else "accuse"
-            elif shortcut == 'examine':
+            elif first in ('e', 'x', 'examine'):
                 return f"examine {' '.join(parts[1:])}" if len(parts) > 1 else "examine"
-            elif shortcut == 'look':
+            elif first in ('l', 'look'):
                 return "look"
-            elif shortcut == 'search':
+            elif first in ('s', 'search'):
                 return "search"
-            elif shortcut == 'inventory':
+            elif first in ('i', 'inv', 'inventory'):
                 return "inventory"
-            elif shortcut == 'help':
+            elif first in ('h', '?'):
                 return "help"
-            elif shortcut == 'quit':
+            elif first == 'q':
                 return "quit"
-            elif shortcut == 'countenance':
+            elif first == 'c':
                 return "countenance"
-            elif shortcut == 'read':
+            elif first == 'r':
                 return "read notepad"
-            elif shortcut == 'theory':
-                return f"theory {' '.join(parts[1:])}" if len(parts) > 1 else "theory"
-            elif shortcut == 'tamper':
-                return f"tamper {' '.join(parts[1:])}" if len(parts) > 1 else "tamper"
+            elif first in ('take', 'p', 'grab', 'pick'):
+                return f"take {' '.join(parts[1:])}" if len(parts) > 1 else "take"
         return raw
 
     def help_text():
         print("""
 Commands (shortcut):
-  go <place>       (g)  – move between rooms (includes freezer if unlocked)
+  go <place>       (g)  – move between rooms
   look             (l)  – survey current location
   search           (s)  – rummage for hidden clues
   examine <obj>    (e/x)– inspect something closely
-  take <item>           – pocket an item (including label)
+  take <item>      (take/p/grab/pick) – pick up an object
   talk <suspect>   (t)  – interrogate a patron
   threaten <suspect>(th)– apply pressure (may backfire)
-  detain <suspect> (d)  – apply handcuffs (3 pairs, or unlimited with cheat)
+  detain <suspect> (d)  – apply handcuffs (3 pairs)
   fight <suspect>  (f)  – resort to violence
   accuse <suspect> (a)  – point the finger
-  tamper <item> on <suspect> – plant evidence
-  tamper <item>         – destroy evidence
-  theory <suspect> (v)  – summarise suspect
   inventory        (i)  – check pockets and evidence
-  countenance      (c)  – use your political ability
+  countenance      (c)  – use your one-time political ability
   help             (h/?)– this list
   quit             (q)  – abandon the case
-  read notepad     (r)  – review collected evidence (grouped, with implications)
-Rooms: counter, dining, kitchen, office, bathroom, freezer (after unlocking)
+  read notepad     (r)  – review collected evidence
+Rooms: counter, dining, kitchen, office, bathroom
 Suspects: Aiden Adams, Blake Jughashvili, Alice Oliverae, Nyx Singénero,
           Elliot Luka, Adeline Malovega, Alexander Hemlock
           (use first name, last name, or full name)
@@ -1709,10 +1288,6 @@ Suspects: Aiden Adams, Blake Jughashvili, Alice Oliverae, Nyx Singénero,
             sys.exit(0)
         elif verb == "read":
             show_notepad()
-        elif verb == "theory":
-            theory(noun)
-        elif verb == "tamper":
-            accuse(f"tamper {noun}")
         else:
             print("Unrecognized command. This must be your first homicide detail. Type 'help' or 'h' for assistance.")
 
