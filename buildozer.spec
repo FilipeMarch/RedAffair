@@ -5,6 +5,7 @@ package.domain = ws.tilda.sentryprotocol
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ogg,wav
 version = 1.81
+version.code = 181
 requirements = python3,kivy
 orientation = all
 icon.filename = %(source.dir)s/RAlogos.png
