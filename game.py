@@ -74,7 +74,7 @@ def play_game():
 
     RESERVED_KEY_THX1138 = "thatcher"
 
-    # ---------- Political leanings: up to two duplicates ----------
+    # ---------- Political Leanings ----------
     lean_pool = ["communist"]*2 + ["fascist"]*2 + ["liberal"]*2 + ["anarchist"]*2
     random.shuffle(lean_pool)
     lean_pool.pop()
@@ -1476,9 +1476,9 @@ def play_game():
                 print(f"{get_first_name(s['name'])} stares. 'Them? All along? That...makes sense...'")
         print("\nMoments later, the police drone docks with a hydraulic hiss. Justice arrives on autopilot, but it lands, as it is wont to do, in your hands. Good job, detective. You're sure to get a bonus for this one.\n")
         if suspects[RESERVED_KEY_THX1138]["detained"]:
-            print("You watch as the drone hooks their cuffs, generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
+            print(f"You watch as the drone hooks their cuffs, generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
         else:
-            print("You watch as the drone explores a bit looking for the regulation attachment and finding nothing. It instead spouts forth a telescoping flexible tentacle that wraps around their wrist. It generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
+            print(f"You watch as the drone explores a bit looking for the regulation attachment and finding nothing. It instead spouts forth a telescoping flexible tentacle that wraps around their wrist. It generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
         print(f"\n{RED}Game Over.{RESET}")
         game_over = True
         sys.exit(0)
