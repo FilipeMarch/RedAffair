@@ -87,36 +87,19 @@ def play_game():
         RESERVED_KEY_THX1138: shuffled_leans[6]
     }
 
-    # ---------- Suspect Descriptions ----------
+    # ---------- Suspect Descriptions (line breaks cleaned, paragraph breaks kept) ----------
     suspect_descriptions = {
         "marcus": (
-            "Aiden Adams slumps against the cash register like any employee who's\n"
-            "realized the universe hates him, his boss tolerates him, and his mother only may have liked him. His beard is\n"
-            "the kind that's seen everything in the perpetual nightlife scene that lures in honeys, hicks, hacks, hackers, and horrors– mostly horrors. He wears a diner uniform standard: black button-up, black pants, red tie, that way you never see it stained with what might be coffee or might be the remnants of a collapsed college student. His eyes are deep wells of calm resignation, the kind you\n"
-            "develop when you've watched people die, or maybe even the kind you develop when you're why people die. A syntharette sits crooked behind his ear, and one glows between his lips, because even in space, some men can't let go\n"
-            "of their addictions."
+            "Aiden Adams slumps against the cash register like any employee who's realized the universe hates him, his boss tolerates him, and his mother only may have liked him. His beard is the kind that's seen everything in the perpetual nightlife scene that lures in honeys, hicks, hacks, hackers, and horrors– mostly horrors. He wears a diner uniform standard: black button-up, black pants, red tie, that way you never see it stained with what might be coffee or might be the remnants of a collapsed college student. His eyes are deep wells of calm resignation, the kind you develop when you've watched people die, or maybe even the kind you develop when you're why people die. A syntharette sits crooked behind his ear, and one glows between his lips, because even in space, some men can't let go of their addictions."
         ),
         "napoleon": (
-            'Bladovich "Blake" Jughashvili occupies a booth like he\'s planning a wedding alone,\n'
-            "and he intends to crash it. ''Heart of Gold, Head of Lead'', reads a sententia in\n"
-            "obscure Na-Min lettering emblazoned across his neck from behind and under his ear\n"
-            "down towards his chin. He's buff, but still shorter than you'd expect,\n"
-            "shorter than he'd like, and shorter than he would willingly admit. The pompadour\n"
-            "adds a few inches to his height, but not his dignity. His hands are on the table,\n"
-            "shaking like someone who's completely innocent, and scared out of their wits; maybe\n"
-            "someone who's guilty, and just wasn't cut out for murder and secret keeping. The\n"
-            "napkins scattered around him are covered in various bodily fluids, all from his\n"
-            "face. For what? Nobody knows. Probably not even him."
+            'Bladovich "Blake" Jughashvili occupies a booth like he\'s planning a wedding alone, and he intends to crash it. ''Heart of Gold, Head of Lead'', reads a sententia in obscure Na-Min lettering emblazoned across his neck from behind and under his ear down towards his chin. He\'s buff, but still shorter than you\'d expect, shorter than he\'d like, and shorter than he would willingly admit. The pompadour adds a few inches to his height, but not his dignity. His hands are on the table, shaking like someone who\'s completely innocent, and scared out of their wits; maybe someone who\'s guilty, and just wasn\'t cut out for murder and secret keeping. The napkins scattered around him are covered in various bodily fluids, all from his face. For what? Nobody knows. Probably not even him.'
         ),
         "cleopatra": (
-            "Alice Oliverae stands by the back door with the bearing of a woman who's\n"
-            "met every goal she laid out in life and found them wanting. Her kohl-rimmed eyes and obsidian rimmed glasses have witnessed the fall of rivals and the rise of ever disappointing replacements. Gold bangles clink on her wrists with every gesture, her outfit is outlandish but somehow still tame. Gold, makeup, and two pins in long stockings made up with gold thread that just doesn't end. She doesn't occupy space so much as allow it the remarkable privilege of containing her."
+            "Alice Oliverae stands by the back door with the bearing of a woman who's met every goal she laid out in life and found them wanting. Her kohl-rimmed eyes and obsidian rimmed glasses have witnessed the fall of rivals and the rise of ever disappointing replacements. Gold bangles clink on her wrists with every gesture, her outfit is outlandish but somehow still tame. Gold, makeup, and two pins in long stockings made up with gold thread that just doesn't end. She doesn't occupy space so much as allow it the remarkable privilege of containing her."
         ),
         RESERVED_KEY_THX1138: (
-            "Nyx Singénero lounges about the back office like they've already been cleared by the investigation. Their posture is a monument to the conviction that they are right and you are merely an inconvenience. The synthjade and anodized chain around their neck catches the flickering white-washed light\n"
-            "and glares in tandem with Nyx right at you with what feels like spite, but may be mild annoyance. Their hair is an auburn tinted burgundy, pulled into a bun and held in place with chopsticks placed with unwavering certainty. When they speak,\n"
-            "their voice has the texture of gravel being crushed into smaller, more compliant gravel. They smell like an ashtray and sound like every smoke they've ever had left enough tar behind to preserve the mesozoic.  There's something in their eyes – not warmth,\n"
-            "exactly, but the cold fusion of absolute conviction. Their feet are on their desk at the end of two crossed legs, but they don't seem to be waiting for you to speak. They seem to already know what you're going to say. Maybe they just know everything."
+            "Nyx Singénero lounges about the back office like they've already been cleared by the investigation. Their posture is a monument to the conviction that they are right and you are merely an inconvenience. The synthjade and anodized chain around their neck catches the flickering white-washed light and glares in tandem with Nyx right at you with what feels like spite, but may be mild annoyance. Their hair is an auburn tinted burgundy, pulled into a bun and held in place with chopsticks placed with unwavering certainty. When they speak, their voice has the texture of gravel being crushed into smaller, more compliant gravel. They smell like an ashtray and sound like every smoke they've ever had left enough tar behind to preserve the mesozoic.  There's something in their eyes – not warmth, exactly, but the cold fusion of absolute conviction. Their feet are on their desk at the end of two crossed legs, but they don't seem to be waiting for you to speak. They seem to already know what you're going to say. Maybe they just know everything."
         ),
         "janitor": "Elliot Luka sweeps the floor with the resigned air of a man who knows that Sisyphus is content, if only because he is Sisyphus. His stained speedsuit and calloused hands speak of endless circuits against invasive pathogens, pests, and careless spills. He rarely speaks, but his eyes flick toward every sound. He's squirrelly, yet composed enough that most wouldn't notice. You do.",
         "cook": "Adeline Malovega stands over the carbon steel griddle, eyes locked a thousand miles through the cook-top beyond the floor. The murder has shut down her kitchen and, apparently, her mind. Tattoos flow around her forearms past her biceps into unique sleeves, the true meaning of which only she would know. Her hair is up in a bun with a hairnet wrapped around her brow and lips that twitch as she breaks her catatonia to notice you.",
@@ -265,9 +248,7 @@ def play_game():
     locations = {
         "counter": {
             "desc": (
-                "THE COUNTER – A scratched carbonite slab that's seen more elbows than a\n"
-                "gala dance floor with Fred Astaire and Bob Fosse. The cash register is smashed open, PCB, chits, change, and Valerian Draughma spilled across the floor like so many things have been over the years, leaving a sticky film beneath your shoes.\n"
-                "The entrance is sealed with a field of plasma that hums something like a funeral dirge. Maybe you're imagining that last bit, but visually, audibly, and tactically if you must, you do know the field is there.\n\n"
+                "THE COUNTER – A scratched carbonite slab that's seen more elbows than a gala dance floor with Fred Astaire and Bob Fosse. The cash register is smashed open, PCB, chits, change, and Valerian Draughma spilled across the floor like so many things have been over the years, leaving a sticky film beneath your shoes. The entrance is sealed with a field of plasma that hums something like a funeral dirge. Maybe you're imagining that last bit, but visually, audibly, and tactically if you must, you do know the field is there.\n\n"
                 + suspect_descriptions["marcus"] + "\n\n" + suspect_descriptions["janitor"]
             ),
             "items": [],
@@ -276,8 +257,7 @@ def play_game():
         },
         "dining": {
             "desc": (
-                "THE DINING AREA – Booths line the walls placed in opposition with a white table between them, and the walls undecorated except for the art deco murals that fill the otherwise unremarkable space; one to each wall. Upholstered in synthleather and what was once blue vinyl, they are now\n"
-                "faded and cracking across every surface except one patch now the color of dried blood and and what was once, presumably, someone's personality. Napkins, sauce, seasoning, and marmalade are strewn across one tabletop, the rest being various gradations of clean, none of which seem hygienic. The jukebox is stuck on a single song – an avant garde noise album, now academically classical hundreds of years later and light-years away, but it vibrates your fillings.\n\n"
+                "THE DINING AREA – Booths line the walls placed in opposition with a white table between them, and the walls undecorated except for the art deco murals that fill the otherwise unremarkable space; one to each wall. Upholstered in synthleather and what was once blue vinyl, they are now faded and cracking across every surface except one patch now the color of dried blood and what was once, presumably, someone's personality. Napkins, sauce, seasoning, and marmalade are strewn across one tabletop, the rest being various gradations of clean, none of which seem hygienic. The jukebox is stuck on a single song – an avant garde noise album, now academically classical hundreds of years later and light-years away, but it vibrates your fillings.\n\n"
                 + suspect_descriptions["napoleon"] + "\n\n" + suspect_descriptions["patron"]
             ),
             "items": [],
@@ -287,12 +267,7 @@ def play_game():
         },
         "kitchen": {
             "desc": (
-                "THE KITCHEN – Stainless steel griddles that haven't been stainless since\n"
-                "the most recent Big Bang. A food can full of what's either canned food or\n"
-                "cleaning solvents sits atop the griddle. The back door is hermetically sealed,\n"
-                "its porthole showing nothing but the indifferent void. Every kitchen has its\n"
-                "secrets, but you feel something extra weighing down the ether in this one.\n"
-                "You intend to find what it is, whatever it takes, and whoever's responsible.\n\n"
+                "THE KITCHEN – Stainless steel griddles that haven't been stainless since the most recent Big Bang. A food can full of what's either canned food or cleaning solvents sits atop the griddle. The back door is hermetically sealed, its porthole showing nothing but the indifferent void. Every kitchen has its secrets, but you feel something extra weighing down the ether in this one. You intend to find what it is, whatever it takes, and whoever's responsible.\n\n"
                 + suspect_descriptions["cleopatra"] + "\n\n" + suspect_descriptions["cook"] +
                 "\nA corkboard hangs beside the back door, pinned with old schedules, a faded menu, and a flier."
             ),
@@ -905,7 +880,7 @@ def play_game():
             inventory.append(item)
             locations[current_location]["items"].remove(item)
             return
-        if item == "notepad":
+        if item in ("notepad", "notes", "notebook"):
             show_notepad()
             return
 
@@ -940,9 +915,11 @@ def play_game():
     # ---------- Notepad ----------
     def show_notepad():
         if not clues:
-            print("The notepad is empty. Nothing to review yet.")
+            print(RED + BLACK_BG + "╔══ NOTEPAD ═══════════════════════════════════════╗")
+            print("║ The notepad is empty. Nothing to review yet.      ║")
+            print("╚══════════════════════════════════════════════════╝" + RESET)
         else:
-            print("─── NOTEPAD ───")
+            print(RED + BLACK_BG + "╔══ NOTEPAD ═══════════════════════════════════════╗")
             # Group by meta-clue for display
             shown_meta = set()
             for c in sorted(clues):
@@ -957,9 +934,9 @@ def play_game():
                         shown_meta.add(meta)
                         name = meta
                         sources = [evidence_display_name(sc) for sc in ids if sc in clues]
-                        combined_desc = f"  • {name}  [Sources: {', '.join(sources)}]"
+                        combined_desc = f"║  • {name}  [Sources: {', '.join(sources)}]"
                         if any(is_misleading(sc) for sc in ids):
-                            combined_desc = f"  {GRAY}• {name} (suspicious)  [Sources: {', '.join(sources)}]{RESET}"
+                            combined_desc = f"║  {GRAY}• {name} (suspicious)  [Sources: {', '.join(sources)}]{RESET}"
                         print(combined_desc)
                 else:
                     # Special display names for ID cards
@@ -971,11 +948,11 @@ def play_game():
                     impl, exon = EVIDENCE_IMPLICATION.get(c, (["Unknown"], []))
                     impl_str = ", ".join(impl) if impl else "None"
                     exon_str = ", ".join(exon) if exon else "None"
-                    line = f"  • {display_name}  [Implicates: {impl_str}; Exonerates: {exon_str}]"
+                    line = f"║  • {display_name}  [Implicates: {impl_str}; Exonerates: {exon_str}]"
                     if is_misleading(c):
-                        line = f"  {GRAY}• {display_name} (suspicious)  [Implicates: {impl_str}; Exonerates: {exon_str}]{RESET}"
+                        line = f"║  {GRAY}• {display_name} (suspicious)  [Implicates: {impl_str}; Exonerates: {exon_str}]{RESET}"
                     print(line)
-            print("───────────────")
+            print("╚══════════════════════════════════════════════════╝" + RESET)
 
     # ---------- Take ----------
     def take(item):
@@ -1678,8 +1655,8 @@ def play_game():
         'g': 'go', 'l': 'look', 's': 'search', 'e': 'examine', 't': 'talk',
         'th': 'threaten', 'd': 'detain', 'f': 'fight', 'a': 'accuse',
         'i': 'inventory', 'inv': 'inventory', 'h': 'help', '?': 'help',
-        'q': 'quit', 'x': 'examine', 'c': 'countenance', 'r': 'read',
-        'v': 'theory', 'tamper': 'tamper'
+        'q': 'quit', 'x': 'examine', 'c': 'countenance',
+        'v': 'theory', 'tamper': 'tamper', 'n': 'notepad'
     }
 
     def expand_command(raw):
@@ -1691,6 +1668,9 @@ def play_game():
             return None
         parts = raw.split()
         first = parts[0].lower()
+        # allow full words for notepad
+        if first in ("notepad", "notes", "notebook"):
+            return "notepad"
         if first in shortcuts:
             shortcut = shortcuts[first]
             if shortcut == 'go':
@@ -1719,8 +1699,8 @@ def play_game():
                 return "quit"
             elif shortcut == 'countenance':
                 return "countenance"
-            elif shortcut == 'read':
-                return "read notepad"
+            elif shortcut == 'notepad':
+                return "notepad"
             elif shortcut == 'theory':
                 return f"theory {' '.join(parts[1:])}" if len(parts) > 1 else "theory"
             elif shortcut == 'tamper':
@@ -1730,30 +1710,44 @@ def play_game():
     # ---------- Help Text ----------
     def help_text():
         print("""
-Commands (shortcut):
-  go <place>       (g)  – move between rooms (includes freezer if unlocked)
-  look             (l)  – survey current location
-  search           (s)  – rummage for hidden clues
-  examine <obj>    (e/x)– inspect something closely
-  take <item>           – pocket an item (including label)
-  talk <suspect>   (t)  – interrogate a patron
-  threaten <suspect>(th)– apply pressure (may backfire)
-  detain <suspect> (d)  – apply handcuffs (3 pairs)
-  fight <suspect>  (f)  – resort to violence
-  accuse <suspect> (a)  – point the finger
-  tamper <item> for <suspect> – tamper evidence for a suspect to help or hinder them or another
-  tamper <item>         – destroy evidence
-  theory <suspect> (v)  – summarise suspect
-  inventory        (i)  – check pockets and evidence
-  countenance      (c)  – use your political ability
-  help             (h/?)– this list
-  quit             (q)  – abandon the case
-  read notepad     (r)  – review collected evidence (grouped, with implications)
-Rooms: counter, dining, kitchen, office, bathroom, freezer (after unlocking)
-Suspects: Aiden Adams, Blake Jughashvili, Alice Oliverae, Nyx Singénero,
-          Elliot Luka, Adeline Malovega, Alexander Hemlock
-          (use first name, last name, or full name)
-""")
+╔══════════════════════════════════════════════════╗
+║                 RED AFFAIR – HELP                ║
+╠══════════════════════════════════════════════════╣
+║ A body cools in the back room. Time drips like   ║
+║ stale coffee. Your wits are your weapon.         ║
+║                                                  ║
+║ Movement:                                        ║
+║   GO <place>   (g) – move to a room (counter,    ║
+║                      dining, kitchen, office,    ║
+║                      bathroom, freezer)          ║
+║   LOOK         (l) – examine your surroundings   ║
+║                                                  ║
+║ Investigation:                                   ║
+║   SEARCH       (s) – find hidden clues           ║
+║   EXAMINE <obj>(e/x)– inspect an item or clue    ║
+║   TAKE <item>       – pick up an object          ║
+║   TALK <suspect>(t) – question a patron          ║
+║   THREATEN <suspect> (th) – apply pressure       ║
+║   THEORY <suspect> (v) – review what you know    ║
+║   NOTEPAD     (n) – review collected evidence    ║
+║     (also notes, notebook)                       ║
+║                                                  ║
+║ Action:                                          ║
+║   DETAIN <suspect> (d) – handcuff (3 pairs)      ║
+║   FIGHT <suspect> (f)  – resort to violence      ║
+║   ACCUSE <suspect> (a) – name the killer         ║
+║   TAMPER <item> for <suspect> – plant evidence    ║
+║   TAMPER <item>          – destroy evidence      ║
+║                                                  ║
+║ General:                                         ║
+║   INVENTORY    (i)  – check pockets and evidence ║
+║   COUNTENANCE  (c)  – use your political ability ║
+║   HELP         (h/?)– this list                 ║
+║   QUIT         (q)  – abandon the case           ║
+║                                                  ║
+║ Suspects: Aiden, Blake, Alice, Nyx,              ║
+║           Elliot, Adeline, Alexander              ║
+╚══════════════════════════════════════════════════╝""")
 
     # ---------- Game Loop ----------
     clear_screen()
@@ -1802,7 +1796,7 @@ Suspects: Aiden Adams, Blake Jughashvili, Alice Oliverae, Nyx Singénero,
         elif verb == "quit":
             print("You step back through the airlock. For now, the case remains unsolved; one day going cold. The stars don't care. Neither do you.")
             sys.exit(0)
-        elif verb == "read":
+        elif verb in ("notepad", "notes", "notebook"):
             show_notepad()
         elif verb == "theory":
             theory(noun)
