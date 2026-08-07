@@ -32,7 +32,7 @@ def play_game():
         "cooling in the back, and it's your job to figure out why.\n\n"
         "Outside the porthole: The Grand Void, silence only ever punctuated by\n"
         "the occasional existential scream of a dying star, planet, or god.\n\n"
-        "The airlock is sealed. The unmanned aerospace police drone is forty hours out.\n"
+        "The airlock is sealed. The unmanned aerospace police drone is a few hours out.\n"
         "Somewhere in this fluorescent flickering palisade of sin, a killer waits."
     + RESET)
     print()
@@ -118,7 +118,7 @@ def play_game():
             "their voice has the texture of gravel being crushed into smaller, more compliant gravel. They smell like an ashtray and sound like every smoke they've ever had left enough tar behind to preserve the mesozoic.  There's something in their eyes – not warmth,\n"
             "exactly, but the cold fusion of absolute conviction. Their feet are on their desk at the end of two crossed legs, but they don't seem to be waiting for you to speak. They seem to already know what you're going to say. Maybe they just know everything."
         ),
-        "janitor": "Elliot Luka sweeps the floor with the resigned air of a man who knows that Sisyphus is content, if only because he is Sisyphus. His stained speedsuit and calloused hands speak of endless circuits against invasive pathogens, pests, and careless spills. He rarely speaks, but his eyes flick toward every sound. He's squirrely, yet composed enough that most wouldn't notice. You do.",
+        "janitor": "Elliot Luka sweeps the floor with the resigned air of a man who knows that Sisyphus is content, if only because he is Sisyphus. His stained speedsuit and calloused hands speak of endless circuits against invasive pathogens, pests, and careless spills. He rarely speaks, but his eyes flick toward every sound. He's squirrelly, yet composed enough that most wouldn't notice. You do.",
         "cook": "Adeline Malovega stands over the carbon steel griddle, eyes locked a thousand miles through the cook-top beyond the floor. The murder has shut down her kitchen and, apparently, her mind. Tattoos flow around her forearms past her biceps into unique sleeves, the true meaning of which only she would know. Her hair is up in a bun with a hairnet wrapped around her brow and lips that twitch as she breaks her catatonia to notice you.",
         "patron": "Alexander Hemlock sits in the corner booth, a cup of cold black coffee before him. His hands tremble, but his eyes are sharp – possibly nerves, possibly a neurodisease. He’s been here since before the murder, and the staff treat him like furniture; not a beautiful armoire, but a living‑room coffee table that’s never seen a coaster and is as replaceable as it is functional."
     }
@@ -259,6 +259,7 @@ def play_game():
     revolver_found = False
     bullet_found_in_office = False
     label_taken = False
+    victim_id_found = False
 
     # ---------- Locations ----------
     locations = {
@@ -323,7 +324,8 @@ def play_game():
             "suspects": [],
             "searchable": [],
             "body_examinable": True,
-            "datachip_found": False
+            "datachip_found": False,
+            "victim_id_found": False
         },
         "freezer": {
             "desc": "FREEZER – A cramped sub-zero storage locker. Frost creeps over plastic crates and a half-empty case of synth-crab.",
@@ -387,7 +389,7 @@ def play_game():
         "luka_says_ring_was_planted": "'The ring... I think someone else took it, or maybe she lost it. I'm being framed. Marsha was a bitch anyway.'",
         "adeline_says_janitor_stole_ring": "'Elliot? He's been obsessed with that ring. Probably sold it to cover his debts.'",
         "adeline_says_alice_argued": "'Alice and Marsha had a screaming match. Something about a promotion, or a client...I don't really remember.'",
-        "adeline_says_victim_was_armed": "'Marsha carried a small knife. She wasn't defenceless. She was ruthless and cruel. I'm not surprised she got got.'",
+        "adeline_says_victim_was_armed": "'Marsha carried a small knife. She wasn't defenseless. She was ruthless and cruel. I'm not surprised she got got.'",
         "hemlock_says_blake_threatened": "'That short fellow? He was muttering threats under his breath all evening.'",
         "hemlock_says_airlock_heard": "'I heard the airlock hiss. Someone came or went right before the bang.'",
         "hemlock_says_nyx_was_calm": "'Nyx? They were the calmest person in the room when it happened. Suspiciously calm.'",
@@ -425,6 +427,17 @@ def play_game():
         "cook": "'So she was my landlord. So what? I didn't kill her over rent. That's insane.'",
         "patron": "'I went to the bathroom. The airlock? I don't know what you're talking about. I'm old, not stupid.'",
         RESERVED_KEY_THX1138: "'You've got nothing. I've been in this office the whole time. Ask anyone who actually matters.'"
+    }
+
+    # ---------- Adeline Escape Reactions ----------
+    ADELINE_ESCAPE_REACTIONS = {
+        "marcus": "Adeline? Idk. She never was one for conflict. I'm guessing she got cold feet and just bounced. Maybe she's hoping you exonerate her by the end of this. Maybe she's just got cold blood. I guess you'll be the first to know.",
+        "napoleon": "Oh, the little frycook lady? Yeah, I saw her run through here, and I assumed you were right behind her. Then, she disappeared out the airlock and was gone. Why did she run? Do you know? No? Maybe she realized you were onto her.",
+        "cleopatra": "Yeah, I think we both know what just happened. What do you want from me? An excuse? An explanation? I have neither and I expect you to learn to cope with that fact sooner than later, detective.",
+        "janitor": "Yeah, I saw her. She rushed past with a haste I'd never seen from her. I'm sure she's just scared out of her wits, the poor thing. She's probably run home to hide under a blanket and hope you find the killer before she's next.",
+        "cook": "I-I'm.... I'm sorry! I can't think straight! This is all just so fucked up! I don't know! I don't know!! I'm not ok. PLEASE, please, understand, I'm scared. I'm so scared. Adeline bursts into tears. A sense of pity opens up in your stomach, and a sense of dread grips you as you realize this poor creature could be manipulating you. It's unlikely, you think, but the possibility is still unsettling, and still not ruled out just yet.",
+        "patron": "Huh? What? Escape? Who? I didn't see anything. And I don't care.",
+        RESERVED_KEY_THX1138: "Adeline ran out the door? Hahaha....that poor thing. She's harmless, but she's also stupid. I'm sure she knows it's a felony to flee an active crime scene like that, but I'm also sure her reasons were poorly thought through and likely more of a mess than she was after the murder. What do you want from me? I have nothing else to say about this."
     }
 
     # ---------- Evidence Descriptions ----------
@@ -479,6 +492,7 @@ def play_game():
         "datachip": "A datachip from a loose panel in the bathroom. Contains encrypted communications.",
         "bloody_cleaver": "A bloody cleaver in the freezer. A grisly red herring.",
         "cleaver_analysis": "Scanner shows the blood is lab-meat juice, not human.",
+        "galactic_id2": "Victim's real ID. Marsha Stone. No doubt about it now.",
     }
 
     # ---------- Evidence Implication / Exoneration ----------
@@ -533,6 +547,7 @@ def play_game():
         "datachip": (["Nyx"], []),
         "bloody_cleaver": (["Unknown"], []),
         "cleaver_analysis": (["Unknown"], []),
+        "galactic_id2": ([], ["Marsha"]),
     }
 
     # ---------- Evidence Aliases ----------
@@ -559,6 +574,8 @@ def play_game():
         "datachip": "datachip", "chip": "datachip",
         "bloody cleaver": "bloody_cleaver", "cleaver": "bloody_cleaver",
         "cleaver analysis": "cleaver_analysis",
+        "fake id": "galactic_id", "fake identification": "galactic_id",
+        "victim's id": "galactic_id2", "real id": "galactic_id2", "marsha's id": "galactic_id2",
 
         # ---------- Merged Gossip Aliases ----------
         "alice's motive": ["aiden_says_alice_promoted", "nyx_alice_promoted_over_victim"],
@@ -632,9 +649,10 @@ def play_game():
         "hemlock_says_airlock_heard": None,
         "hemlock_says_nyx_was_calm": None,
         "bullet_casing": "You open the revolver, pull out the casing, and drop it into the slot. It's a perfect fit. This bullet was definitely fired from this gun. That much is obvious.",
-        "datachip": "You plug the chip into your scanner and wait for the data to transfer. A few seconds later a notification appears:\n\"ENCRYPTED DATA\"\nYou select the option to decrypt. There's no telling when, or even if, this will finish anytime soon. You put everything away and take a deep breath. Just as your hands return to your sides, you hear a ping and pull your scanner back out of your pocket to see the screen\nEst. Decryption: 13h47m18s\nWell, that's not good. You'll have to figure something else out after all.",
+        "datachip": "You plug the chip into your scanner and wait for the data to transfer. A few seconds later a notification appears:\n\"ENCRYPTED DATA\"\nYou select the option to decrypt. There's no telling when, or even if, this will finish anytime soon. You put everything away and take a deep breath. Just as your hands return to your sides, you hear a ping and pull your scanner back out of your pocket to see the screen\nEst. Decryption: 132h2m12s\nWell, that's not good. You'll have to figure something else out after all.",
         "bloody_cleaver": "You scan the cleaver, first for DNA then for prints. The prints match Adeline. She definitely handled it.",
         "cleaver_analysis": "Further analysis confirms the blood is lab‑meat juice, not human. Adeline's story checks out.",
+        "galactic_id2": "This is her genuine ID. Marsha Stone. No aliases, no games.",
     }
 
     # ---------- Tamper / Plant Actions ----------
@@ -772,7 +790,7 @@ def play_game():
 
     # ---------- Search ----------
     def search():
-        nonlocal revolver_found, bullet_found_in_office, bathroom_panel_revealed, freezer_unlocked, freezer_cleaver_found, label_taken
+        nonlocal revolver_found, bullet_found_in_office, bathroom_panel_revealed, freezer_unlocked, freezer_cleaver_found, label_taken, victim_id_found
         loc = locations[current_location]
         if current_location == "dining" and loc.get("hidden_revolver") and not revolver_found:
             revolver_found = True
@@ -790,6 +808,12 @@ def play_game():
             print("You pry open the loose panel. Inside: a datachip, cold and unmarked.")
             add_evidence("datachip")
             inventory.append("datachip")
+            return
+        if current_location == "bathroom" and body_examined and not victim_id_found:
+            victim_id_found = True
+            inventory.append("galactic_id2")
+            add_evidence("galactic_id2")
+            print("You find a second ID card tucked inside her jacket. It's real. Marsha Stone.")
             return
         if current_location == "freezer":
             if not freezer_cleaver_found and "cook_landlord" in talk_history:
@@ -842,11 +866,15 @@ def play_game():
 
     # ---------- Examine ----------
     def examine(item):
-        nonlocal body_examined, bathroom_panel_revealed
+        nonlocal body_examined, bathroom_panel_revealed, victim_id_found
         if item == "body" and current_location == "bathroom":
             if not body_examined:
                 body_examined = True
-                print("The victim appears to be between the ages of 25 and 30. Feminine. Clothes are in tact, the wallet is in hand. From the look of it, it doesn't seem it ever left her fist. She's approximately 5 feet tall. Her makeup is done, smeared only from the blood. For a brief moment, you wonder what foundation she used. You've only ever heard of makeup smudging in old films.\n\nThe victim's face: mild surprise. Death wasn't so much terrifying as much as it was rude. Between the eyes is a bullet wound: neat, centered, professional even. Someone knew what they were doing.")
+                print("The victim appears to be between the ages of 25 and 30. Feminine. Her clothes are intact, the wallet still clutched in her fist. She's approximately 5 feet tall. Her makeup is done, smeared only by the blood. You wonder what foundation she used.\n\nThe victim's face: mild surprise. Death wasn't so much terrifying as it was rude. Between the eyes is a bullet wound: neat, centered, professional even. Someone knew what they were doing.\n\nYou carefully search her pockets. Inside her jacket you find a real ID: Marsha Stone. That's her name. The one upstairs is a clear fake, but it's still up in the air as to what it was used for exactly.")
+                if not victim_id_found:
+                    victim_id_found = True
+                    inventory.append("galactic_id2")
+                    add_evidence("galactic_id2")
             else:
                 print("The body remains. It hasn't changed. Corpses rarely do.")
                 if not bathroom_panel_revealed and trust["janitor"] >= 3:
@@ -855,7 +883,7 @@ def play_game():
             return
         if item == "corkboard" and current_location == "kitchen":
             print("The corkboard is a collage of fading schedules, a yellowed menu, and a crisp flier for 'Reyes Properties'. The same name as on the victim's ID, if you've seen it.")
-            if "galactic_id" in inventory or "signet ring" in inventory:
+            if "galactic_id" in inventory or "galactic_id2" in inventory:
                 print("The connection clicks: the victim owned the complex where Adeline lives.")
             return
         if item == "freezer" and current_location == "kitchen":
@@ -868,7 +896,7 @@ def play_game():
             if item == "signet ring":
                 print("A heavy silver ring, engraved with the initials E.R. It feels cold and important.")
             else:
-                print("The ID reads 'E. Reyes' with a photo of the victim. The address lists a building complex owned by a shell company.")
+                print("The ID reads 'E. Reyes' with a photo of the victim. It's clearly a forgery.")
             inventory.append(item)
             locations[current_location]["items"].remove(item)
             return
@@ -886,6 +914,12 @@ def play_game():
         if ev_id is None:
             if item in EVIDENCE_DESCRIPTIONS:
                 ev_id = item
+        if isinstance(ev_id, list):
+            # merged alias – pick first source that is in clues, else first
+            found = next((eid for eid in ev_id if eid in clues), None)
+            if found is None:
+                found = ev_id[0]
+            ev_id = found
         if ev_id:
             desc = EVIDENCE_DESCRIPTIONS.get(ev_id, "No description.")
             impl, exon = EVIDENCE_IMPLICATION.get(ev_id, (["Unknown"], []))
@@ -928,13 +962,18 @@ def play_game():
                             combined_desc = f"  {GRAY}• {name} (suspicious)  [Sources: {', '.join(sources)}]{RESET}"
                         print(combined_desc)
                 else:
-                    name = evidence_display_name(c)
+                    # Special display names for ID cards
+                    display_name = evidence_display_name(c)
+                    if c == "galactic_id":
+                        display_name = "Fake ID"
+                    elif c == "galactic_id2":
+                        display_name = "Victim's ID"
                     impl, exon = EVIDENCE_IMPLICATION.get(c, (["Unknown"], []))
                     impl_str = ", ".join(impl) if impl else "None"
                     exon_str = ", ".join(exon) if exon else "None"
-                    line = f"  • {name}  [Implicates: {impl_str}; Exonerates: {exon_str}]"
+                    line = f"  • {display_name}  [Implicates: {impl_str}; Exonerates: {exon_str}]"
                     if is_misleading(c):
-                        line = f"  {GRAY}• {name} (suspicious)  [Implicates: {impl_str}; Exonerates: {exon_str}]{RESET}"
+                        line = f"  {GRAY}• {display_name} (suspicious)  [Implicates: {impl_str}; Exonerates: {exon_str}]{RESET}"
                     print(line)
             print("───────────────")
 
@@ -1025,6 +1064,10 @@ def play_game():
             if sus == "patron" and "hemlock_yelling" not in clues:
                 options.append("the noise")
 
+            # Option to ask about Adeline's escape if she has escaped
+            if suspects["cook"].get("escaped", False) and sus != "cook":
+                options.append("Adeline's escape")
+
             gossip_clue = None
             for speaker, (target, _, clue_id) in MOTIVE_GOSSIP.items():
                 if target == sus and clue_id in clues:
@@ -1108,7 +1151,7 @@ def play_game():
                     print(f"For a moment, but just a moment, something flickers; their face an old neon sign on its last leg that hardly says anything completely. 'Never seen it before, detective.' The lie is obvious, but not why.")
                     trust_change(sus, -1)
             elif topic == "anything odd outside" and sus == "marcus":
-                print("'I saw some track out the back porthole. They're too big to be mine, I know that. I know a lot of things. It's a curse sometimes.'")
+                print("'I saw some tracks out the back porthole. They're too big to be mine, I know that. I know a lot of things. It's a curse sometimes.'")
                 add_evidence("aiden_footprint")
                 trust_change("marcus", 1)
             elif topic == "did you see anything" and sus == "napoleon":
@@ -1131,6 +1174,11 @@ def play_game():
                 print("'There was yelling near the office. I couldn’t make out the words, but it was heated.'")
                 add_evidence("hemlock_yelling")
                 trust_change("patron", 1)
+            elif topic == "Adeline's escape":
+                if sus in ADELINE_ESCAPE_REACTIONS:
+                    print(ADELINE_ESCAPE_REACTIONS[sus])
+                else:
+                    print("They don't seem to have anything to say about that.")
             elif topic.startswith("confront "):
                 if sus in CONFRONT_DIALOGUE:
                     print(f"{get_first_name(suspects[sus]['name'])} stares at you: {CONFRONT_DIALOGUE[sus]}")
@@ -1308,6 +1356,11 @@ def play_game():
         if ev_id is None:
             if item in EVIDENCE_DESCRIPTIONS:
                 ev_id = item
+        if isinstance(ev_id, list):
+            found = next((eid for eid in ev_id if eid in clues), None)
+            if found is None:
+                found = ev_id[0]
+            ev_id = found
         if ev_id is None or ev_id not in TAMPER_ACTIONS:
             print("That item can't be tampered with.")
             return
@@ -1321,7 +1374,7 @@ def play_game():
             print(msg)
         elif action_type == "plant":
             if not suspect:
-                print("You need to specify a suspect to plant on. Use 'tamper revolver on Alice'")
+                print("You need to specify a suspect to plant on. Use 'tamper revolver for Alice'")
                 return
             resolved = resolve_suspect(suspect)
             if not resolved:
@@ -1347,7 +1400,7 @@ def play_game():
             print("Accuse who? Make up your mind, detective.")
             return
         if sus.startswith("tamper "):
-            parts = sus[7:].split(" on ")
+            parts = sus[7:].split(" for ")
             if len(parts) == 2 and parts[1].strip():
                 tamper(parts[0].strip(), parts[1].strip())
             else:
@@ -1425,7 +1478,15 @@ def play_game():
     def corruption_ending():
         nonlocal game_over
         if sfx_queue: sfx_queue.put('gameover')
-        print(f"You plant the revolver and make your accusation. The frame holds. The police drone accepts your report without question.")
+        item_name = "unknown"
+        if corruption_planted:
+            # find what was planted
+            if "revolver" not in inventory and "bloody_cleaver" not in inventory:
+                # assume bullet casing or revolver were planted
+                item_name = "revolver"
+            else:
+                item_name = "evidence"
+        print(f"You plant the {item_name} and make your accusation. The frame holds. The police drone accepts your report without question.")
         print("A dirty cop ending. Justice is served cold, and you're the one holding the freezer door open.")
         print(f"{RED}GAME OVER – CORRUPTION ENDING{RESET}")
         game_over = True
@@ -1531,13 +1592,13 @@ def play_game():
             handcuffs += 1
             print("You speak into your cufflinks, whether anyone notices or not is immaterial. A commissar materialises from the ventilation shaft, slaps a fresh pair of cuffs into your palm, and vanishes. This is sure to be useful. (+1 cuffs)")
         elif player_lean == "anarchist":
-            candidates = [k for k in suspects if k != RESERVED_KEY_THX1138 and not suspects[k]["exonerated"]]
+            candidates = [k for k in suspects if k != RESERVED_KEY_THX1138 and not suspects[k]["exonerated"] and suspects[k]["alive"]]
             if not candidates:
-                print("Everyone not guilty is already cleared. The gesture does nothing.")
+                print("There's no one left but the last suspect. What do you expect to happen exactly?")
                 return
             chosen = random.choice(candidates)
             suspects[chosen]["exonerated"] = True
-            print("You start beating your chest and call for everyone to rally where you stand. You make an impassioned speech detailing the nature of liberty, law, justice, and outline flaws in the current galactic justice system. In the chaos, a few things happen, and you struggle to keep track of what happens when.")
+            print("You start beating your chest and call for everyone to rally where you stand. You make an impassioned speech detailing the nature of liberty, law, justice, and outline the flaws in the current galactic justice system. In the chaos, a few things happen, and you struggle to keep track of what happens when.")
             print(f"{get_first_name(suspects[chosen]['name'])} is completely exonerated. All evidence tied to them evaporates like mist.")
             prefixes = {
                 "marcus": ["aiden_alibi", "aiden_footprint"],
@@ -1677,10 +1738,10 @@ Commands (shortcut):
   take <item>           – pocket an item (including label)
   talk <suspect>   (t)  – interrogate a patron
   threaten <suspect>(th)– apply pressure (may backfire)
-  detain <suspect> (d)  – apply handcuffs (3 pairs, or unlimited with cheat)
+  detain <suspect> (d)  – apply handcuffs (3 pairs)
   fight <suspect>  (f)  – resort to violence
   accuse <suspect> (a)  – point the finger
-  tamper <item> on <suspect> – plant evidence
+  tamper <item> for <suspect> – tamper evidence for a suspect to help or hinder them or another
   tamper <item>         – destroy evidence
   theory <suspect> (v)  – summarise suspect
   inventory        (i)  – check pockets and evidence
