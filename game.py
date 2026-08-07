@@ -45,8 +45,7 @@ def play_game():
     print(f"\n{RED}{BLACK_BG}The name's {player_name}. Licensed to poke around in other people's misery.\n")
     print(f"The universe doesn't care. But you should, and here you are.{RESET}\n")
 
-    LEANINGS = ["communist", "fascist", "liberal", "anarchist",
-                "communist", "fascist", "liberal"]
+    LEANINGS = ["communist", "fascist", "liberal", "anarchist"]
     print(f"{RED}{BLACK_BG}Before we begin – your, um- political leanings?")
     print("(It matters as much as anything matters in a pressurized tin can. Turns out? Quite a lot.)")
     print("1. Communist – Strong and welcoming. The people united will never be defeated.")
@@ -75,8 +74,11 @@ def play_game():
 
     RESERVED_KEY_THX1138 = "thatcher"
 
-    shuffled_leans = LEANINGS.copy()
-    random.shuffle(shuffled_leans)
+    # ---------- Political leanings: up to two duplicates ----------
+    lean_pool = ["communist"]*2 + ["fascist"]*2 + ["liberal"]*2 + ["anarchist"]*2
+    random.shuffle(lean_pool)
+    lean_pool.pop()
+    shuffled_leans = lean_pool[:]
     suspect_leans = {
         "marcus": shuffled_leans[0],
         "napoleon": shuffled_leans[1],
@@ -87,7 +89,7 @@ def play_game():
         RESERVED_KEY_THX1138: shuffled_leans[6]
     }
 
-    # ---------- Suspect Descriptions (line breaks cleaned, paragraph breaks kept) ----------
+    # ---------- Suspect Descriptions ----------
     suspect_descriptions = {
         "marcus": (
             "Aiden Adams slumps against the cash register like any employee who's realized the universe hates him, his boss tolerates him, and his mother only may have liked him. His beard is the kind that's seen everything in the perpetual nightlife scene that lures in honeys, hicks, hacks, hackers, and horrors– mostly horrors. He wears a diner uniform standard: black button-up, black pants, red tie, that way you never see it stained with what might be coffee or might be the remnants of a collapsed college student. His eyes are deep wells of calm resignation, the kind you develop when you've watched people die, or maybe even the kind you develop when you're why people die. A syntharette sits crooked behind his ear, and one glows between his lips, because even in space, some men can't let go of their addictions."
@@ -890,7 +892,6 @@ def play_game():
             if item in EVIDENCE_DESCRIPTIONS:
                 ev_id = item
         if isinstance(ev_id, list):
-            # merged alias – pick first source that is in clues, else first
             found = next((eid for eid in ev_id if eid in clues), None)
             if found is None:
                 found = ev_id[0]
@@ -904,7 +905,6 @@ def play_game():
             verify = EVIDENCE_VERIFY.get(ev_id)
             if verify is not None:
                 print(verify)
-                # Auto-add confirmed alibis if scanner verifies them
                 if ev_id == "blake_alibi" and "blake_alibi_confirmed" not in clues:
                     add_evidence("blake_alibi_confirmed")
                 if ev_id == "alice_alibi" and "alice_alibi_confirmed" not in clues:
@@ -920,10 +920,8 @@ def play_game():
             print("╚══════════════════════════════════════════════════╝" + RESET)
         else:
             print(RED + BLACK_BG + "╔══ NOTEPAD ═══════════════════════════════════════╗")
-            # Group by meta-clue for display
             shown_meta = set()
             for c in sorted(clues):
-                # find meta key if this is a sub-clue
                 meta = None
                 for alias, ids in EVIDENCE_ALIASES.items():
                     if isinstance(ids, list) and c in ids:
@@ -939,7 +937,6 @@ def play_game():
                             combined_desc = f"║  {GRAY}• {name} (suspicious)  [Sources: {', '.join(sources)}]{RESET}"
                         print(combined_desc)
                 else:
-                    # Special display names for ID cards
                     display_name = evidence_display_name(c)
                     if c == "galactic_id":
                         display_name = "Fake ID"
@@ -1041,7 +1038,6 @@ def play_game():
             if sus == "patron" and "hemlock_yelling" not in clues:
                 options.append("the noise")
 
-            # Option to ask about Adeline's escape if she has escaped
             if suspects["cook"].get("escaped", False) and sus != "cook":
                 options.append("Adeline's escape")
 
@@ -1328,7 +1324,6 @@ def play_game():
     # ---------- Tamper / Plant ----------
     def tamper(item, suspect=None):
         nonlocal corruption_planted
-        # Determine if item is an alias or direct ID
         ev_id = EVIDENCE_ALIASES.get(item.lower())
         if ev_id is None:
             if item in EVIDENCE_DESCRIPTIONS:
@@ -1357,7 +1352,6 @@ def play_game():
             if not resolved:
                 print("Invalid suspect.")
                 return
-            # Remove item from inventory if present, or mark as planted
             if ev_id == "unknown_revolver" and "revolver" in inventory:
                 inventory.remove("revolver")
             elif ev_id == "bullet_casing" and "bullet_casing" not in inventory:
@@ -1366,7 +1360,6 @@ def play_game():
             elif ev_id == "bloody_cleaver" and "bloody_cleaver" not in inventory:
                 print("You don't have the cleaver.")
                 return
-            # Set corruption planted
             corruption_planted = resolved
             print(msg.format(suspect=get_first_name(suspects[resolved]['name'])))
 
@@ -1457,9 +1450,7 @@ def play_game():
         if sfx_queue: sfx_queue.put('gameover')
         item_name = "unknown"
         if corruption_planted:
-            # find what was planted
             if "revolver" not in inventory and "bloody_cleaver" not in inventory:
-                # assume bullet casing or revolver were planted
                 item_name = "revolver"
             else:
                 item_name = "evidence"
@@ -1475,7 +1466,7 @@ def play_game():
         k = suspects[RESERVED_KEY_THX1138]
         print(f"\n{RED}Everything clicks into place. The whole crooked design.{RESET}")
         print(f"'{get_first_name(k['name'])}, in the office, with the revolver. Marsha Stone killed in cold blood. For ego? For fun? For the oldest reason there ever was: because you could.'")
-        print(f"{get_first_name(k['name'])} deflates like a punctured flight suit. 'Yes, you meddling {random.choice(k['curses'])}. Fine! I did it. And I'd do it again. I'd do it all again without a second damn thought.'")
+        print(f"{get_first_name(k['name'])} deflates like a punctured air mattress under the crushing weight of the fat man known as consequences. 'Yes, you meddling {random.choice(k['curses'])}. Fine! I did it. And I'd do it again. I'd do it all again without a second god-damned thought.'")
         print("The confession hangs in the air, hideous and undeniable. You make your notes.")
         for sus in suspects:
             if sus == RESERVED_KEY_THX1138: continue
@@ -1484,7 +1475,11 @@ def play_game():
                 curse = random.choice(s["curses"]) if s["curses"] else "sprocket-head"
                 print(f"{get_first_name(s['name'])} stares. 'Them? All along? That...makes sense...'")
         print("\nMoments later, the police drone docks with a hydraulic hiss. Justice arrives on autopilot, but it lands, as it is wont to do, in your hands. Good job, detective. You're sure to get a bonus for this one.\n")
-        print(f"{RED}Game Over.{RESET}")
+        if suspects[RESERVED_KEY_THX1138]["detained"]:
+            print("You watch as the drone hooks their cuffs, generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
+        else:
+            print("You watch as the drone explores a bit looking for the regulation attachment and finding nothing. It instead spouts forth a telescoping flexible tentacle that wraps around their wrist. It generates an ionic iso-field around their unconscious body, and takes off to the station only a nano-parsec away, give or take. You feel a sense of fullness in your heart, and it's not cholesterol. Good, job, {player_name}.")
+        print(f"\n{RED}Game Over.{RESET}")
         game_over = True
         sys.exit(0)
 
@@ -1569,28 +1564,10 @@ def play_game():
             handcuffs += 1
             print("You speak into your cufflinks, whether anyone notices or not is immaterial. A commissar materialises from the ventilation shaft, slaps a fresh pair of cuffs into your palm, and vanishes. This is sure to be useful. (+1 cuffs)")
         elif player_lean == "anarchist":
-            candidates = [k for k in suspects if k != RESERVED_KEY_THX1138 and not suspects[k]["exonerated"] and suspects[k]["alive"]]
-            if not candidates:
-                print("There's no one left but the last suspect. What do you expect to happen exactly?")
-                return
-            chosen = random.choice(candidates)
-            suspects[chosen]["exonerated"] = True
-            print("You start beating your chest and call for everyone to rally where you stand. You make an impassioned speech detailing the nature of liberty, law, justice, and outline the flaws in the current galactic justice system. In the chaos, a few things happen, and you struggle to keep track of what happens when.")
-            print(f"{get_first_name(suspects[chosen]['name'])} is completely exonerated. All evidence tied to them evaporates like mist.")
-            prefixes = {
-                "marcus": ["aiden_alibi", "aiden_footprint"],
-                "napoleon": ["blake_alibi", "blake_witness"],
-                "cleopatra": ["alice_alibi", "alice_witness"],
-                "janitor": ["luka_alibi", "luka_swept"],
-                "cook": ["adeline_timestamps", "adeline_heard"],
-                "patron": ["hemlock_missing", "hemlock_yelling"]
-            }
-            for clue in prefixes.get(chosen, []):
-                if clue in clues:
-                    remove_evidence(clue)
-                    if clue in incriminating:
-                        required_incriminating = max(0, required_incriminating - 1)
-                        print(f"(Required incriminating evidence now {required_incriminating})")
+            print("You distribute anarchist pamphlets, spreading solidarity. Those leaning anarchist or communist take notice.")
+            for k in suspects:
+                if suspects[k]["lean"] in ("anarchist", "communist") and suspects[k]["alive"] and not suspects[k]["exonerated"]:
+                    trust_change(k, 1)
         else:
             print("Your Countenance manifests in an unexpected way. Nothing happens.")
         if cheat_infinite_countenance:
@@ -1612,13 +1589,11 @@ def play_game():
         s = suspects[sus]
         name = get_first_name(s['name'])
         print(f"{name}.")
-        # Motives
         if sus in MOTIVE_GOSSIP:
             target, gossip_text, _ = MOTIVE_GOSSIP[sus]
             print(f"Known motives: {s['motive']} (Also: {gossip_text})")
         else:
             print(f"Known motives: {s['motive']}")
-        # Evidence for/against
         evidence_for = []
         evidence_against = []
         for ev_id in clues:
@@ -1630,7 +1605,6 @@ def play_game():
                     evidence_against.append(evidence_display_name(ev_id))
         print(f"Evidence for {name}: {', '.join(evidence_for) if evidence_for else 'none'}")
         print(f"Evidence against {name}: {', '.join(evidence_against) if evidence_against else 'none'}")
-        # Alibi
         alibi_map = {
             "marcus": "aiden_alibi",
             "napoleon": "blake_alibi",
@@ -1668,7 +1642,6 @@ def play_game():
             return None
         parts = raw.split()
         first = parts[0].lower()
-        # allow full words for notepad
         if first in ("notepad", "notes", "notebook"):
             return "notepad"
         if first in shortcuts:
