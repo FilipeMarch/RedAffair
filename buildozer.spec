@@ -1,7 +1,7 @@
 [app]
 title = Red Affair
-package.name = redaffair
 package.name = ws.tilda.sentryprotocol.redaffair
+package.domain = ws.tilda.sentryprotocol
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ogg,wav
 version = 0.1
