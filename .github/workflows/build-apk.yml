@@ -12,6 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Java (solves JAVA_HOME bug)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -20,31 +26,24 @@ jobs:
       - name: Install Buildozer & dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip openjdk-17-jdk-headless \
-            git zip unzip autoconf libtool cmake libffi-dev \
-            libssl-dev
+          sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev
           pip3 install buildozer cython
 
-      - name: Set up Android SDK and accept licenses
+      - name: Fix Android SDK licenses & Aidl
         run: |
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
-          # Download command line tools if missing
           if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
             unzip commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools/"
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
             rm commandlinetools-linux-*.zip
           fi
-          # Accept all licenses and install build-tools
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" || true
 
       - name: Build APK
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
-          export PATH=$JAVA_HOME/bin:$PATH
-          buildozer android debug
+        run: buildozer android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
