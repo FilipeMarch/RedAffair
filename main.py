@@ -67,22 +67,25 @@ class SFXManager:
         self.app = app
         self.sounds = {}
         self.miss_counter = 0
+        self.sfx_display = {}
 
         sfx_list = [
-            ('accuse', 'audio/sfx/accuse.ogg'),
-            ('gameover', 'audio/sfx/GameOver.ogg'),
-            ('fight', 'audio/sfx/fight.ogg'),
-            ('miss', 'audio/sfx/miss.ogg'),
-            ('miss2', 'audio/sfx/miss2.ogg'),
-            ('jaildoor', 'audio/sfx/jaildoor.ogg'),
-            ('lvlup', 'audio/sfx/lvlup.ogg'),
-            ('take', 'audio/sfx/take.ogg'),
-            ('cuffs', 'audio/sfx/cuffs.ogg'),
-            ('hit', 'audio/sfx/hit.ogg'),
+            ('accuse', 'audio/sfx/accuse.ogg', 'Accuse'),
+            ('gameover', 'audio/sfx/GameOver.ogg', 'Game Over'),
+            ('fight', 'audio/sfx/fight.ogg', 'Fight'),
+            ('miss', 'audio/sfx/miss.ogg', 'Miss'),
+            ('miss2', 'audio/sfx/miss2.ogg', 'Miss 2'),
+            ('jaildoor', 'audio/sfx/jaildoor.ogg', 'Jail Door'),
+            ('lvlup', 'audio/sfx/lvlup.ogg', 'Level Up'),
+            ('take', 'audio/sfx/take.ogg', 'Take Item'),
+            ('cuffs', 'audio/sfx/cuffs.ogg', 'Cuffs'),
+            ('hit', 'audio/sfx/hit.ogg', 'Hit'),
+            ('victory', 'audio/sfx/victory.ogg', 'You Win!'),
         ]
-        for event, filename in sfx_list:
+        for event, filename, display in sfx_list:
             try:
                 self.sounds[event] = SoundLoader.load(filename)
+                self.sfx_display[event] = display
             except Exception as e:
                 log_crash(f"Failed to load SFX {filename}: {traceback.format_exc()}")
 
@@ -671,23 +674,41 @@ class AboutScreen(Screen):
 
     def show_game_info(self, instance):
         from kivy.uix.popup import Popup
-        content = Label(
+        from kivy.uix.boxlayout import BoxLayout
+        content = BoxLayout(orientation='vertical', padding=10)
+        label = Label(
             text="Red Affair is a neo-noir game inspired by Zork and Disco Elysium style games. It has been a longtime dream of mine to make something exactly like this, and now that I'm fully transitioning into tech as a career, I thought it would be the best first use of my skills and abilities. This game is free to play, own, and distribute. Anyone charging money for it(not that they would, I mean, why would they?) is scamming you or lying to you in some way. If you want, you can reach out to me through any of the links provided in the donate menu or through the Linkedin or Github links embedded into the game. I will be happy to give you the game for free quickly and without resistance.\n\nThe main point of this game is to give myself a portfolio for potential employers to look at. It's something that demonstrates an understanding of python, UI design, and game design. Everything was done entirely by me or using open-source files or otherwise free-use licensed files. I wrote the lines of dialogue, code, and narration.\n\nI hope you like it.",
             font_size='18sp',
             color=(1,0,0,1),
-            markup=False
+            size_hint_y=None,
+            halign='left',
+            valign='top'
         )
+        label.bind(
+            width=lambda instance, value: setattr(instance, 'text_size', (value, None)),
+            texture_size=lambda instance, size: setattr(instance, 'height', size[1])
+        )
+        content.add_widget(label)
         popup = Popup(title='About the game', content=content, size_hint=(0.8, 0.7))
         popup.open()
 
     def show_dev_info(self, instance):
         from kivy.uix.popup import Popup
-        content = Label(
+        from kivy.uix.boxlayout import BoxLayout
+        content = BoxLayout(orientation='vertical', padding=10)
+        label = Label(
             text="SiliCast Games is a single-member independent developer project that is seeking to reinvigorate and reintroduce classic styles of games from a bygone era. Everything used in the games is either open-source, common use, or made entirely by hand. At no point is money ever requested for the download, use, or distribution of this game, the files therein, or the identity of the studio. For questions and comments, check the github and linkedin buttons or email me at\n\ncorrespondenceadg@gmail.com",
             font_size='18sp',
             color=(1,0,0,1),
-            markup=False
+            size_hint_y=None,
+            halign='left',
+            valign='top'
         )
+        label.bind(
+            width=lambda instance, value: setattr(instance, 'text_size', (value, None)),
+            texture_size=lambda instance, size: setattr(instance, 'height', size[1])
+        )
+        content.add_widget(label)
         popup = Popup(title='About SiliCast Games', content=content, size_hint=(0.8, 0.7))
         popup.open()
 
@@ -1311,9 +1332,12 @@ class SoundTestScreen(Screen):
         app = App.get_running_app()
         self.sound_list = []
         for name, sound in app.sfx_manager.sounds.items():
-            self.sound_list.append(('SFX', name, sound))
+            display = app.sfx_manager.sfx_display.get(name, name)
+            self.sound_list.append(('SFX', display, sound))
         for track in app.music_tracks:
-            self.sound_list.append(('MUSIC', track, None))
+            info = app.music_info.get(track, ('Unknown', 'Unknown'))
+            display = f"{info[0]} - {info[1]}"
+            self.sound_list.append(('MUSIC', display, None))
         self.current_index = 0
         self._update_display()
 
