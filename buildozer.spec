@@ -30,5 +30,6 @@ android.permissions = INTERNET
 android.release_artifact = aab
 android.sign = 0
 
+
 [buildozer]
 log_level = 2
