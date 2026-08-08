@@ -4,32 +4,18 @@ package.name = ws.tilda.sentryprotocol.redaffair
 package.domain = ws.tilda.sentryprotocol
 source.dir = .
 source.include_exts = py,png,jpg,ttf,ogg,wav
-version = 1.81
-version.code = 181
+version = 1.9
+version.code = 190
 requirements = python3,kivy
 orientation = all
 icon.filename = %(source.dir)s/RAlogos.png
-presplash.filename = %(source.dir)s/presplash.png
-osx.python_version = 3
-osx.kivy_version = 2.3.0
-fullscreen = 0
-log_level = 2
-warn_on_root = 1
-
-android.api = 33
-android.minapi = 21
-android.ndk = 25b
-android.sdk = 30
-android.compile_sdk = 33
-android.arch = arm64-v8a
-android.accept_sdk_license = True
-android.build_tools_version = 34.0.0
-android.allow_backup = True
-android.permissions = INTERNET
-
-android.release_artifact = aab
-android.sign = 0
-
 
 [buildozer]
 log_level = 2
+build_dir = .buildozer
+bin_dir = bin
+android.accept_sdk_license = True
+android.ndk = 27c
+android.sdk = 35
+android.minapi = 21
+android.arch = arm64-v8a
