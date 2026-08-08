@@ -1,8 +1,6 @@
-Categories:
-  - Games
+Categories: Games
 License: Apache-2.0
 SourceCode: https://github.com/correspondenceadg-cmyk/RedAffair
-
 Name: Red Affair
 Summary: A text‑based detective mystery set in a retro‑scifi space diner
 Description: |
@@ -12,23 +10,18 @@ Description: |
   suspects, gather evidence, and decide whether to pursue justice or embrace
   chaos. Minimalist text interface with deep branching dialogue and multiple
   endings.
-
 AuthorName: Tara Moralés / SiliCast Games©
 AuthorEmail: correspondenceadg@gmail.com
-
 RepoType: git
-Repo: https://github.com/correspondenceadg-cmyk/RedAffair.git
-
+Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-
-CurrentVersion: "1.1.81"
-CurrentVersionCode: 1
-
+CurrentVersion: 1.82
+CurrentVersionCode: 182
 Builds:
-  - versionName: '1.1.81'
-    versionCode: 1
-    commit: v1.1.81
+  - versionName: 1.82
+    versionCode: 182
+    commit: v1.82
     subdir: .
     gradle:
       - yes
@@ -42,7 +35,7 @@ Builds:
                    --arch=armeabi-v7a \
                    --name="Red Affair" \
                    --package=ws.tilda.sentryprotocol.redaffair \
-                   --version=1.1.81 \
+                   --version=1.82 \
                    --private=. \
                    --orientation=portrait \
                    --permission=INTERNET \
@@ -52,5 +45,5 @@ Builds:
                    --bootstrap=sdl2 \
                    --dist-name=redaffair \
                    --release
-    ndk: r25b
-    sdk: 33
+    ndk: r27c
+    sdk: 35
