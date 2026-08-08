@@ -25,8 +25,20 @@ jobs:
             libssl-dev
           pip3 install buildozer cython
 
-      - name: Clean Buildozer cache
-        run: rm -rf ~/.buildozer
+      - name: Set up Android SDK and accept licenses
+        run: |
+          export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+          # Download command line tools if missing
+          if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            unzip commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools/"
+            mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
+            rm commandlinetools-linux-*.zip
+          fi
+          # Accept all licenses and install build-tools
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" || true
 
       - name: Build APK
         run: |
