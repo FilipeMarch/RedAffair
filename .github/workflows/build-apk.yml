@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java (solves JAVA_HOME bug)
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -29,18 +29,20 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev
           pip3 install buildozer cython
 
-      - name: Fix Android SDK licenses & Aidl
+      - name: Fix Android SDK legacy path and install build-tools
         run: |
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
           if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-            unzip commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools/"
+            unzip -q commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools/"
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
             rm commandlinetools-linux-*.zip
           fi
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" || true
+          # Buildozer is hardcoded to look for 'tools/bin/sdkmanager'. This symlink forces it to work.
+          ln -sf "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
+          yes | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses || true
+          "$ANDROID_HOME/tools/bin/sdkmanager" "build-tools;35.0.0" || true
 
       - name: Build APK
         run: buildozer android debug
