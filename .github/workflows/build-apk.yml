@@ -43,6 +43,7 @@ jobs:
             latest_dir="$(ls -1d /usr/local/lib/android/sdk/cmdline-tools/* 2>/dev/null | head -n 1)"
             ln -sf "$latest_dir" ~/.buildozer/android/platform/android-sdk/tools
           fi
+echo "ANDROIDNDK=/home/runner/.buildozer/android/platform/android-ndk-r27c" >> $GITHUB_ENV
 
       - name: Build APK (both ABIs)
         run: |
