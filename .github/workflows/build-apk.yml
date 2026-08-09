@@ -31,8 +31,12 @@ jobs:
         run: |
           rm -rf ~/.buildozer
           mkdir -p ~/.buildozer/android/platform
+
           ln -sf /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
+
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
+          ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r28c
+
           if [ -d /usr/local/lib/android/sdk/cmdline-tools/latest ]; then
             ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
           else
