@@ -9,33 +9,26 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install Buildozer & dependencies
+      
+      - name: Install Buildozer
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential python3-dev
+          sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential
           pip3 install buildozer cython
 
-      - name: 🔥 Completely wipe .buildozer to force clean state
-        run: rm -rf /home/runner/.buildozer
-
-      - name: Manually install Android SDK & NDK r27c via sdkmanager
+      - name: Manually install NDK r27c and force Buildozer to use it
         run: |
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+          
           # Download cmdline-tools if missing
           if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
@@ -43,23 +36,19 @@ jobs:
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
             rm commandlinetools-linux-*.zip
           fi
-          # Legacy symlink for Buildozer
           ln -sf "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
-          # Accept licenses
+          
+          # Accept licenses and install exact platforms/build-tools/NDK r27c
           yes | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses || true
-          # Install SDK platforms and build-tools
           "$ANDROID_HOME/tools/bin/sdkmanager" "platforms;android-35" || true
           "$ANDROID_HOME/tools/bin/sdkmanager" "build-tools;35.0.0" || true
-          # Manually install NDK r27c (this is the version you need)
           "$ANDROID_HOME/tools/bin/sdkmanager" "ndk;27.3.13750724" || true
-          # Create a symlink so Buildozer sees it as ndk-r27c
-          ln -sf "$ANDROID_HOME/ndk/27.3.13750724" "$ANDROID_HOME/ndk-r27c"
+          
+          # --- THE FIX: Force buildozer.spec to use the absolute path ---
+          sed -i 's|^android.ndk = 27c|android.ndk = /home/runner/.buildozer/android/platform/android-sdk/ndk/27.3.13750724|' buildozer.spec
 
-      - name: Force Buildozer to use the correct NDK
-        run: |
-          export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
-          export ANDROIDNDK="$ANDROID_HOME/ndk-r27c"
-          buildozer android debug
+      - name: Build APK
+        run: buildozer android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
