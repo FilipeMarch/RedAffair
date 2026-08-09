@@ -23,13 +23,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Buildozer & dependencies
+      - name: Install Buildozer & essential dev dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev
+          sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential python3-dev
           pip3 install buildozer cython
 
-      - name: Fix Android SDK legacy path & install required components
+      - name: 🔥 PURGE STALE NDK CACHE (The exact fix for the r28c conflict)
+        run: rm -rf /home/runner/.buildozer/android/platform/android-ndk-*
+
+      - name: Fix Android SDK legacy path & install components
         run: |
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
@@ -39,14 +42,10 @@ jobs:
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
             rm commandlinetools-linux-*.zip
           fi
-          # Create legacy tools symlink
           ln -sf "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
-          # Accept licenses and install required SDK components
           yes | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses || true
           "$ANDROID_HOME/tools/bin/sdkmanager" "platforms;android-35" || true
           "$ANDROID_HOME/tools/bin/sdkmanager" "build-tools;35.0.0" || true
-          # Verify installation
-          ls -l "$ANDROID_HOME/build-tools/35.0.0/aidl" || echo "Aidl not found, will fail"
 
       - name: Build APK
         run: buildozer android debug
