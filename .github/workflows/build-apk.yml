@@ -10,11 +10,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - name: Build with Buildozer
-        uses: m4n3z/buildozer-action@v1
+        uses: pitonio/buildozer-action@v1
         with:
           workdir: .
           android_accept_sdk_license: true
