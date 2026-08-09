@@ -29,7 +29,7 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev
           pip3 install buildozer cython
 
-      - name: Fix Android SDK legacy path and install build-tools
+      - name: Fix Android SDK legacy path & install required components
         run: |
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
@@ -39,10 +39,14 @@ jobs:
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
             rm commandlinetools-linux-*.zip
           fi
-          # Buildozer is hardcoded to look for 'tools/bin/sdkmanager'. This symlink forces it to work.
+          # Create legacy tools symlink
           ln -sf "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
+          # Accept licenses and install required SDK components
           yes | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses || true
+          "$ANDROID_HOME/tools/bin/sdkmanager" "platforms;android-35" || true
           "$ANDROID_HOME/tools/bin/sdkmanager" "build-tools;35.0.0" || true
+          # Verify installation
+          ls -l "$ANDROID_HOME/build-tools/35.0.0/aidl" || echo "Aidl not found, will fail"
 
       - name: Build APK
         run: buildozer android debug
