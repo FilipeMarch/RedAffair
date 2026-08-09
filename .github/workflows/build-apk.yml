@@ -24,16 +24,17 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential
           pip3 install buildozer cython
 
-      - name: 🔥 Create Buildozer's exact expected paths as symlinks to system SDK
+      - name: 🔥 Create Buildozer's hardcoded SDK/NDK paths with proper symlinks
         run: |
-          # Wipe any cached Buildozer folder to ensure a clean slate
           rm -rf ~/.buildozer
-          # Create the parent directory
           mkdir -p ~/.buildozer/android/platform
-          # Symlink the entire system SDK into the exact location Buildozer expects
+          # SDK root symlink
           ln -sf /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
-          # Symlink the system NDK into the exact name Buildozer expects (ndk-r27c)
+          # NDK symlink (named exactly what Buildozer expects)
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
+          # The critical missing piece: symlink 'tools' to cmdline-tools/latest
+          # so Buildozer finds sdkmanager at .../android-sdk/tools/bin/sdkmanager
+          ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
 
       - name: Build APK
         run: buildozer android debug
