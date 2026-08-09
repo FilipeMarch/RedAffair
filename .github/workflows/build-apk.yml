@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    tags: [ 'v*' ]
+    tags: ['v*']
   workflow_dispatch:
 
 jobs:
@@ -10,10 +10,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -22,22 +24,34 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential
+          pip3 install --upgrade pip
           pip3 install buildozer cython
 
-      - name: 🔥 Create Buildozer's hardcoded SDK/NDK paths with proper symlinks
+      - name: Fix up local Buildozer SDK/NDK paths (minimal + deterministic)
         run: |
           rm -rf ~/.buildozer
           mkdir -p ~/.buildozer/android/platform
+
           # SDK root symlink
           ln -sf /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
-          # NDK symlink (named exactly what Buildozer expects)
+
+          # NDK symlink Buildozer expects (match buildozer.spec android.ndk=27c)
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
-          # The critical missing piece: symlink 'tools' to cmdline-tools/latest
-          # so Buildozer finds sdkmanager at .../android-sdk/tools/bin/sdkmanager
-          ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
+
+          # Ensure cmdline-tools exist where sdkmanager is expected.
+          # Prefer cmdline-tools/latest; if not present, fall back to cmdline-tools.
+          if [ -d /usr/local/lib/android/sdk/cmdline-tools/latest ]; then
+            ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
+          else
+            # Fallback: if only one cmdline-tools directory exists, link it as tools
+            latest_dir="$(ls -1d /usr/local/lib/android/sdk/cmdline-tools/* 2>/dev/null | head -n 1)"
+            ln -sf "$latest_dir" ~/.buildozer/android/platform/android-sdk/tools
+          fi
 
       - name: Build APK
-        run: buildozer android debug
+        run: |
+          rm -rf .buildozer bin
+          buildozer android debug --verbose
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
