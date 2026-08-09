@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential
           pip3 install buildozer cython
 
-      - name: 🔥 Full reset and exact NDK folder placement
+      - name: 🔥 Full reset and SDK/NDK setup
         run: |
           rm -rf ~/.buildozer
           export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
@@ -33,13 +33,17 @@ jobs:
           unzip -q commandlinetools-linux-*.zip -d "$ANDROID_HOME/cmdline-tools/"
           mv "$ANDROID_HOME/cmdline-tools/cmdline-tools"/* "$ANDROID_HOME/cmdline-tools/latest/"
           rm commandlinetools-linux-*.zip
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.3.13750724" || true
-          # THE LITERAL FIX: symlink to the exact name Buildozer wants
+          # Create tools symlink so Buildozer finds sdkmanager
+          ln -sf "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
+          # Accept licenses and install components
+          yes | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses || true
+          "$ANDROID_HOME/tools/bin/sdkmanager" "platforms;android-35" || true
+          "$ANDROID_HOME/tools/bin/sdkmanager" "build-tools;35.0.0" || true
+          "$ANDROID_HOME/tools/bin/sdkmanager" "ndk;27.3.13750724" || true
+          # Create NDK symlink for Buildozer
           mkdir -p "$HOME/.buildozer/android/platform"
           ln -sf "$ANDROID_HOME/ndk/27.3.13750724" "$HOME/.buildozer/android/platform/android-ndk-r27c"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
 
       - name: Build APK
         run: buildozer android debug
