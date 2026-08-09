@@ -37,13 +37,14 @@ jobs:
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r28c
 
+          echo "ANDROIDNDK=/home/runner/.buildozer/android/platform/android-ndk-r27c" >> $GITHUB_ENV
+
           if [ -d /usr/local/lib/android/sdk/cmdline-tools/latest ]; then
             ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
           else
             latest_dir="$(ls -1d /usr/local/lib/android/sdk/cmdline-tools/* 2>/dev/null | head -n 1)"
             ln -sf "$latest_dir" ~/.buildozer/android/platform/android-sdk/tools
           fi
-echo "ANDROIDNDK=/home/runner/.buildozer/android/platform/android-ndk-r27c" >> $GITHUB_ENV
 
       - name: Build APK (both ABIs)
         run: |
