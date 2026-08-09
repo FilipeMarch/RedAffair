@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,png,jpg,ttf,ogg,wav
 version = 1.82
 version.code = 182
-requirements = python3,kivy
+requirements = python3.11,kivy
 orientation = all
 icon.filename = %(source.dir)s/RAlogos.png
 
