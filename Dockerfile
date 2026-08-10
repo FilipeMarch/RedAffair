@@ -30,4 +30,4 @@ WORKDIR /app
 
 COPY . /app
 
-CMD ["bash", "-lc", "rm -rf /root/.buildozer && yes | /root/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses && printf 'y\n' | buildozer android debug"]
+CMD ["bash", "-lc", "rm -rf /root/.buildozer && yes | buildozer android debug"]
