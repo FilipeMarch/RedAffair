@@ -16,12 +16,12 @@ RepoType: git
 Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.82
-CurrentVersionCode: 182
+CurrentVersion: 1.114
+CurrentVersionCode: 1114
 Builds:
-  - versionName: 1.82
-    versionCode: 182
-    commit: v1.82
+  - versionName: 1.114
+    versionCode: 1114
+    commit: v1.114
     subdir: .
     gradle:
       - yes
@@ -35,7 +35,7 @@ Builds:
                    --arch=armeabi-v7a \
                    --name="Red Affair" \
                    --package=ws.tilda.sentryprotocol.redaffair \
-                   --version=1.82 \
+                   --version=1.114 \
                    --private=. \
                    --orientation=portrait \
                    --permission=INTERNET \
