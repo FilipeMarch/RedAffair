@@ -7,7 +7,7 @@ source.include_exts = py,png,jpg,ttf,ogg,wav
 version = 1.114
 version.code = 1114
 requirements = python3,kivy
-orientation = all
+orientation = sensor
 icon.filename = %(source.dir)s/RAlogos.png
 
 [buildozer]
