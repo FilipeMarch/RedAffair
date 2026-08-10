@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     build-essential \
+    autoconf \
+    automake \
+    libtool \
     libffi-dev \
     libssl-dev \
     libncurses5 \
