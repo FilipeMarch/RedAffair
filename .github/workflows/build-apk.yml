@@ -22,16 +22,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y git zip unzip autoconf libtool cmake libffi-dev libssl-dev build-essential
-          pip3 install buildozer cython
+          # Install specific compatible versions to avoid Python 3.14 venv issues
+          pip3 install 'buildozer==1.5.0' 'cython==0.29.37' 'python-for-android==2024.01.08'
 
-      - name: 🔥 Fix SDK/NDK paths and override env variable
+      - name: 🔥 Force Python 3.11 and fix NDK paths
         run: |
-          rm -rf ~/.buildozer
+          # Force Python 3.11 to be the default
+          echo "PYTHON=python3.11" >> $GITHUB_ENV
+          
+          # Completely clear buildozer cache to avoid Python 3.14 venv issues
+          rm -rf ~/.buildozer ~/.android
           mkdir -p ~/.buildozer/android/platform
+          
+          # Symlink system SDK and NDK into Buildozer's expected location
           ln -sf /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
           ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
-          # Trick the runner by also symlinking r28c to r27c
-          ln -sf /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r28c
+          
           # Symlink tools for sdkmanager
           if [ -d /usr/local/lib/android/sdk/cmdline-tools/latest ]; then
             ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest ~/.buildozer/android/platform/android-sdk/tools
@@ -39,17 +45,16 @@ jobs:
             latest_dir="$(ls -1d /usr/local/lib/android/sdk/cmdline-tools/* 2>/dev/null | head -n 1)"
             ln -sf "$latest_dir" ~/.buildozer/android/platform/android-sdk/tools
           fi
-          # Force the environment variable to r27c
+          
+          # Override NDK environment variable
           echo "ANDROIDNDK=/home/runner/.buildozer/android/platform/android-ndk-r27c" >> $GITHUB_ENV
           echo "ANDROID_NDK=/home/runner/.buildozer/android/platform/android-ndk-r27c" >> $GITHUB_ENV
 
-      - name: Build APK (both ABIs)
+      - name: Build APK (both ABIs) with Python 3.11
         run: |
-          # Export again to ensure it takes effect
-          export ANDROIDNDK=/home/runner/.buildozer/android/platform/android-ndk-r27c
-          export ANDROID_NDK=/home/runner/.buildozer/android/platform/android-ndk-r27c
-          rm -rf .buildozer bin
-          buildozer android debug --verbose
+          python3.11 -m buildozer android debug --verbose
+        env:
+          PYTHON: python3.11
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
