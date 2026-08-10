@@ -14,21 +14,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: false
-          load: true
-          tags: redaffair-builder:latest
-
-      - name: Build APK using Docker
+      - name: Build and run Docker image
         run: |
-          docker run --rm \
-            -v $(pwd):/app \
-            -v $(pwd)/bin:/app/bin \
-            redaffair-builder:latest \
-            buildozer android debug --verbose
+          docker build -t redaffair-build .
+          docker run --rm -v $(pwd):/app redaffair-build
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
