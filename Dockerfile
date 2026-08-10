@@ -30,4 +30,4 @@ WORKDIR /app
 
 COPY . /app
 
-CMD ["bash", "-lc", "printf 'y\n' | buildozer android debug"]
+CMD ["bash", "-lc", "rm -rf /root/.buildozer && yes | buildozer android debug"]
