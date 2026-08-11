@@ -32,4 +32,5 @@ RUN python3.11 -m pip install --upgrade pip setuptools wheel && \
 WORKDIR /app
 COPY . /app
 
-CMD ["bash", "-lc", "rm -rf /root/.buildozer && PYTHON=/usr/bin/python3.11 buildozer android debug"]
+
+CMD ["bash", "-lc", "export BUILDOZER_ACCEPT_ROOT_USER=1 && rm -rf /root/.buildozer && PYTHON=/usr/bin/python3.11 buildozer android debug"]
