@@ -15,6 +15,7 @@ log_level = 2
 build_dir = .buildozer
 bin_dir = bin
 android.accept_sdk_license = True
+android.accept_root_user = True    # <-- This line stops the y/n prompt
 android.ndk = 27c
 android.sdk = 35
 android.minapi = 21
