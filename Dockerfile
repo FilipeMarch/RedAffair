@@ -27,10 +27,9 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
     update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
 
 RUN python3.11 -m pip install --upgrade pip setuptools wheel && \
-    python3.11 -m pip install cython==0.29.37 buildozer==1.5.0
+    python3.11 -m pip install cython buildozer
 
 WORKDIR /app
-
 COPY . /app
 
-CMD ["bash", "-lc", "rm -rf /root/.buildozer && yes | buildozer android debug"]
+CMD ["bash", "-lc", "rm -rf /root/.buildozer && PYTHON=/usr/bin/python3.11 buildozer android debug"]
