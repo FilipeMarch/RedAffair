@@ -8,20 +8,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build and run Docker image
+      - name: Build Docker image
         run: |
-          docker build -t redaffair-build .
-          # Add -i to attach stdin so 'yes |' actually works
-          docker run --rm -i -v $(pwd):/app redaffair-build
+          docker build -t redaffair-build:latest .
+
+      - name: Run build in Docker
+        run: |
+          docker run --rm \
+            --tty \
+            --interactive \
+            -v "$(pwd)":/app \
+            -e BUILDOZER_ACCEPT_ROOT_USER=1 \
+            -e PYTHON=/usr/bin/python3.11 \
+            redaffair-build:latest
+
+      - name: Check for APK
+        run: |
+          ls -lh bin/*.apk 2>/dev/null || echo "No APK found"
+          find . -name "*.apk" -type f
 
       - name: Upload APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
           path: bin/*.apk
+          retention-days: 30
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
