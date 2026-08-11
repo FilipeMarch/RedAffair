@@ -1,8 +1,7 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
-    BUILDOZER_ACCEPT_ROOT_USER=1
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk-headless \
@@ -33,4 +32,4 @@ RUN python3.11 -m pip install --upgrade pip setuptools wheel && \
 WORKDIR /app
 COPY . /app
 
-CMD ["bash", "-lc", "rm -rf /root/.buildozer && PYTHON=/usr/bin/python3.11 buildozer android debug"]
+CMD ["bash", "-lc", "rm -rf /root/.buildozer && yes | PYTHON=/usr/bin/python3.11 buildozer android debug"]
