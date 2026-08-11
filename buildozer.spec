@@ -19,6 +19,7 @@ android.ndk = 27c
 android.sdk = 35
 android.minapi = 21
 android.arch = arm64-v8a,armeabi-v7a
+
 p4a.ignore_setup_py = 1
 p4a.install_pip = 0
 p4a.bootstrap = sdl2
