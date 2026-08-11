@@ -17,7 +17,8 @@ jobs:
       - name: Build and run Docker image
         run: |
           docker build -t redaffair-build .
-          docker run --rm -v $(pwd):/app redaffair-build
+          # Add -i to attach stdin so 'yes |' actually works
+          docker run --rm -i -v $(pwd):/app redaffair-build
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
