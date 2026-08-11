@@ -7,22 +7,30 @@ source.include_exts = py,png,jpg,ttf,ogg,wav
 version = 1.114
 version.code = 1114
 requirements = python3,kivy
-orientation = portrait, landscape
+orientation = portrait,landscape
 icon.filename = %(source.dir)s/RAlogos.png
+fullscreen = 0
 
 [buildozer]
 log_level = 2
 build_dir = .buildozer
 bin_dir = bin
-android.accept_sdk_license = True
-android.accept_root_user = True    # <-- This line stops the y/n prompt
-android.ndk = 27c
-android.sdk = 35
-android.minapi = 21
-android.arch = arm64-v8a,armeabi-v7a
+warn_on_root = 0
 
-p4a.ignore_setup_py = 1
-p4a.install_pip = 0
+[app:android]
+android.permissions = INTERNET
+android.api = 33
+android.minapi = 21
+android.ndk = 27c
+android.sdk = 33
+android.accept_sdk_license = True
+android.accept_root_user = True
+android.bootstrap = sdl2
+android.arch = arm64-v8a,armeabi-v7a
+android.release_artifact = apk
+
 p4a.bootstrap = sdl2
 p4a.python_version = 3.11
-p4a.hostpython = /usr/bin/python3.11
+p4a.arch = arm64-v8a,armeabi-v7a
+p4a.ignore_setup_py = 1
+p4a.install_pip = 0
