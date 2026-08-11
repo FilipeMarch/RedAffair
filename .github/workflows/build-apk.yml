@@ -17,8 +17,7 @@ jobs:
       - name: Build and run Docker image
         run: |
           docker build -t redaffair-build .
-          # Pass the environment variable to skip root prompt
-          docker run --rm -e BUILDOZER_ACCEPT_ROOT_USER=1 -v $(pwd):/app redaffair-build
+          docker run --rm -v $(pwd):/app redaffair-build
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
