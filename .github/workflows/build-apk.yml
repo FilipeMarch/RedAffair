@@ -1,5 +1,4 @@
 name: Build APK
-
 on:
   push:
     tags: ['v*']
@@ -12,12 +11,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t redaffair-build:latest .
+        run: |
+          docker build -t redaffair-build:latest .
+
+      - name: Create Buildozer cache volume
+        run: |
+          docker volume create redaffair-buildozer-cache
 
       - name: Run build in Docker
         run: |
           docker run --rm \
             -v "${{ github.workspace }}":/home/builder/app \
+            -v redaffair-buildozer-cache:/home/builder/.buildozer \
             redaffair-build:latest
 
       - name: Upload APK artifact
