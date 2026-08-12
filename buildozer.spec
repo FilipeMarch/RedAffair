@@ -13,37 +13,22 @@ fullscreen = 0
 
 [buildozer]
 log_level = 2
-warn_on_root = 0               # not needed when we run as non‑root
+warn_on_root = 0
 build_dir = .buildozer
 bin_dir = bin
 
 [app:android]
 android.permissions = INTERNET
-android.api = 33                # matches your current SDK target
+android.api = 36
 android.minapi = 21
-android.sdk = 33
-android.ndk = 27c               # exact NDK version we fetched
+android.sdk = 36
+android.ndk = 29
 android.bootstrap = sdl2
 android.arch = arm64-v8a,armeabi-v7a
-android.accept_sdk_license = True
-android.accept_root_user = True   # harmless, kept for completeness
-p4a.python_version = 3.11
-p4a.bootstrap = sdl2
-
-[app:android]
-android.permissions = INTERNET
-android.api = 33
-android.minapi = 21
-android.ndk = 27c
-android.sdk = 33
 android.accept_sdk_license = True
 android.accept_root_user = True
-android.bootstrap = sdl2
-android.arch = arm64-v8a,armeabi-v7a
-android.release_artifact = apk
-
+p4a.python_version = 3.14
 p4a.bootstrap = sdl2
-p4a.python_version = 3.11
 p4a.arch = arm64-v8a,armeabi-v7a
 p4a.ignore_setup_py = 1
 p4a.install_pip = 0
