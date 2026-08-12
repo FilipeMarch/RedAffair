@@ -28,4 +28,6 @@ ENV PATH="/home/builder/venv/bin:$PATH"
 COPY . /home/builder/app
 WORKDIR /home/builder/app
 
+RUN mkdir -p .buildozer && chown builder:builder .buildozer
+
 CMD ["bash", "-c", "buildozer android debug"]
