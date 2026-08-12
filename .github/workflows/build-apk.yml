@@ -13,13 +13,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t redaffair-build:latest .
+  run: docker build -t redaffair-build:latest .
 
-      - name: Run build in Docker (no TTY needed)
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}":/home/builder/app \
-            redaffair-build:latest
+- name: Run build in Docker
+  run: docker run --rm -v "${{ github.workspace }}":/home/builder/app redaffair-build:latest
+
 
       - name: Upload APK artifact
         if: success()
