@@ -22,4 +22,4 @@ android.arch = arm64-v8a,armeabi-v7a
 
 p4a.ignore_setup_py = 1
 p4a.install_pip = 0
-p4a.python_version = 3.14
+p4a.python_version = 3.10
