@@ -1,8 +1,8 @@
 Categories: Games
 License: Apache-2.0
-SourceCode: https://github.com/correspondenceadg-cmyk/RedAffair
+SourceCode: https://github.com/correspondenceadg-cmyk/Red-Affair
 Name: Red Affair
-Summary: A text‑based detective mystery set in a retro‑scifi space diner
+Summary: Text‑based detective mystery set in a retro‑sci‑fi space diner
 Description: |
   A short, narrative‑driven detective game inspired by classic text adventures.
   You play as a detective investigating a murder in a space diner on the edge
@@ -10,40 +10,30 @@ Description: |
   suspects, gather evidence, and decide whether to pursue justice or embrace
   chaos. Minimalist text interface with deep branching dialogue and multiple
   endings.
+
 AuthorName: Tara Moralés / SiliCast Games©
 AuthorEmail: correspondenceadg@gmail.com
 RepoType: git
 Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
+
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
+
 CurrentVersion: 1.114
 CurrentVersionCode: 1114
+
 Builds:
   - versionName: 1.114
     versionCode: 1114
     commit: v1.114
     subdir: .
     gradle:
-      - yes
+      - yes               # keep the default gradle wrapper behaviour
     prebuild:
       - echo "android { defaultConfig { applicationId \"ws.tilda.sentryprotocol.redaffair\" } }" > build.gradle
       - echo "apply plugin: 'com.android.application'" >> build.gradle
     build:
-      - pip3 install --upgrade buildozer python-for-android
-      - p4a create --requirements=python3,kivy \
-                   --arch=arm64-v8a \
-                   --arch=armeabi-v7a \
-                   --name="Red Affair" \
-                   --package=ws.tilda.sentryprotocol.redaffair \
-                   --version=1.114 \
-                   --private=. \
-                   --orientation=portrait \
-                   --permission=INTERNET \
-                   --android-api=30 \
-                   --sdk-dir=/opt/android-sdk \
-                   --ndk-dir=/opt/android-ndk \
-                   --bootstrap=sdl2 \
-                   --dist-name=redaffair \
-                   --release
+      - pip install --upgrade buildozer python-for-android
+      - buildozer android debug   # the Docker image already has all SDK/NDK files
     ndk: r27c
-    sdk: 35
+    sdk: 33
