@@ -1,5 +1,4 @@
 name: Build APK
-
 on:
   push:
     tags: ['v*']
@@ -9,31 +8,18 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
-    
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build Docker image
-        run: |
-          docker build -t redaffair-build:latest .
+        run: docker build -t redaffair-build:latest .
 
-      - name: Run build in Docker
+      - name: Run build in Docker (no TTY needed)
         run: |
           docker run --rm \
-            --tty \
-            --interactive \
-            -v "$(pwd)":/app \
-            -e BUILDOZER_ACCEPT_ROOT_USER=1 \
-            -e PYTHON=/usr/bin/python3.11 \
+            -v "${{ github.workspace }}":/home/builder/app \
             redaffair-build:latest
-
-      - name: Check for APK
-        run: |
-          ls -lh bin/*.apk 2>/dev/null || echo "No APK found"
-          find . -name "*.apk" -type f
 
       - name: Upload APK artifact
         if: success()
