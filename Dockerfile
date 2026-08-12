@@ -17,7 +17,7 @@ WORKDIR /home/builder
 
 RUN python3.11 -m venv /home/builder/venv && \
     /home/builder/venv/bin/pip install --upgrade pip setuptools wheel && \
-    /home/builder/venv/bin/pip install buildozer==1.5.0 python-for-android==2024.06.15
+    /home/builder/venv/bin/pip install buildozer==1.5.0 python-for-android==2026.5.9
 
 ENV ANDROIDNDK_ROOT=/home/builder/.buildozer/android/platform/android-ndk-r27c
 RUN mkdir -p $(dirname $ANDROIDNDK_ROOT) && \
@@ -37,4 +37,4 @@ ENV PATH="/home/builder/venv/bin:$PATH"
 ENV BUILDOZER_ACCEPT_ROOT_USER=1
 ENV ANDROID_ACCEPT_SDK_LICENSE=1
 
-CMD ["bash", "-c", "buildozer android debug 2>&1 | tee build.log && ls -lh bin/*.apk || true"]
+CMD ["bash","-c","buildozer android debug 2>&1 | tee build.log && ls -lh bin/*.apk || true"]
