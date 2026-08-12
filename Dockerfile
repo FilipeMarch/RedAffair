@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN useradd -m -s /bin/bash builder
 
+RUN mkdir -p /home/builder/.buildozer && chown -R builder:builder /home/builder/.buildozer
+
 USER builder
 WORKDIR /home/builder
 
