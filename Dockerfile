@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.11 python3.11-dev python3.11-venv python3-pip \
     git wget unzip build-essential autoconf automake libtool m4 \
     pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
-    lib32stdc++6 lib32z1 lib32ncurses5
+    lib32stdc++6 lib32z1
 
 RUN useradd -m -s /bin/bash builder && \
     echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
