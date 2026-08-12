@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILDOZER_ACCEPT_ROOT_USER=1
 ENV ANDROID_ACCEPT_SDK_LICENSE=1
+ENV BUILD_DIR=/home/builder/.buildozer   # Buildozer cache location
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jdk-headless \
@@ -13,8 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash builder
-
-RUN mkdir -p /home/builder/.buildozer && chown -R builder:builder /home/builder/.buildozer
 
 USER builder
 WORKDIR /home/builder
