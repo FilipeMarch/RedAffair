@@ -1,29 +1,85 @@
-[app]
-title = Red Affair
-package.name = ws.tilda.sentryprotocol.redaffair
-package.domain = ws.tilda.sentryprotocol
-source.dir = .
-source.include_exts = py,png,jpg,ttf,ogg,wav
-version = 1.114
-version.code = 1114
-# Pin a universal‑wheel version of charset_normalizer
-requirements = python3,kivy,charset_normalizer==3.2.0
-orientation = fullSensor
-icon.filename = %(source.dir)s/RAlogos.png
+name: Build APK
 
-[buildozer]
-log_level = 2
-build_dir = .buildozer
-bin_dir = bin
-android.accept_sdk_license = True
-android.ndk = 29
-android.sdk = 36
-android.minapi = 21
-android.arch = arm64-v8a,armeabi-v7a
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
 
-p4a.ignore_setup_py = 1
-# Let pip run inside the Android environment so the pinned wheel can be installed
-p4a.install_pip = 1
-p4a.python_version = 3.10
-# Use a recent python‑for‑android commit that already fixed the import error
-p4a.branch = 90c1e3b2f9c5d8a6e4b7c1f9a2d3e4f5a6b7c8d9
+permissions:
+  contents: read
+  actions: read   # needed for upload‑artifact
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: build-apk-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive \
+            apt-get install -y --no-install-recommends \
+            openjdk-17-jdk-headless git wget unzip zip curl \
+            build-essential autoconf automake libtool \
+            pkg-config libffi-dev libssl-dev libncurses5-dev \
+            libjpeg-dev zlib1g-dev lib32stdc++6 lib32z1
+          sudo apt-get clean && rm -rf /var/lib/apt/lists/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install Android SDK & NDK
+        env:
+          ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+          ANDROID_NDK_ROOT: ${{ runner.temp }}/android-ndk
+        run: |
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip -q tools.zip
+          mv cmdline-tools latest
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "ndk;27c"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+          echo "$ANDROID_SDK_ROOT" >> $GITHUB_PATH
+          echo "$ANDROID_NDK_ROOT" >> $GITHUB_PATH
+
+      - name: Cache Buildozer venv
+        uses: actions/cache@v4
+        with:
+          path: ~/.venv
+          key: buildozer-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
+
+      - name: Install Buildozer
+        run: |
+          python -m venv ~/.venv
+          source ~/.venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          # Pin to a known‑good commit SHA (replace <sha> with the one you verify)
+          pip install git+https://github.com/kivy/buildozer.git@<sha>
+          echo "~/.venv/bin" >> $GITHUB_PATH
+
+      - name: Build APK with Buildozer
+        env:
+          ANDROIDSDK: ${{ runner.temp }}/android-sdk
+          ANDROIDNDK: ${{ runner.temp }}/android-ndk
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+        run: |
+          source ~/.venv/bin/activate
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: redaffair-apk
+          path: bin/*.apk
