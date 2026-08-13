@@ -2,9 +2,9 @@ Categories: Games
 License: Apache-2.0
 SourceCode: https://github.com/correspondenceadg-cmyk/Red-Affair
 Name: Red Affair
-Summary: Text‑based detective mystery set in a retro‑sci‑fi space diner
+Summary: Text-based detective mystery set in a retro-sci-fi space diner
 Description: |
-  A short, narrative‑driven detective game inspired by classic text adventures.
+  A short, narrative-driven detective game inspired by classic text adventures.
   You play as a detective investigating a murder in a space diner on the edge
   of the Pillars of Creation. Choose your political leaning, interrogate
   suspects, gather evidence, and decide whether to pursue justice or embrace
@@ -31,5 +31,5 @@ Builds:
     build:
       - pip install --upgrade buildozer python-for-android
       - buildozer android debug
-    ndk: r27c
-    sdk: 36
+    ndk: 27.0.11902837
+    sdk: 37
