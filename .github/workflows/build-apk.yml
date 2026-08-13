@@ -61,7 +61,7 @@ jobs:
 
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses > /dev/null 2>&1
+          echo "y" | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
 
           sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" \
@@ -82,11 +82,11 @@ jobs:
       - name: Verify SDK/NDK layout
         run: |
           echo "=== Build tools ==="
-          ls "$ANDROID_SDK_ROOT/build-tools/"
+          ls -la "$ANDROID_SDK_ROOT/build-tools/" || echo "Build tools directory not found"
           echo "=== NDK ==="
-          ls "$ANDROID_SDK_ROOT/ndk/"
-          echo "=== aidl ==="
-          which aidl || ls "$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS/aidl"
+          ls -la "$ANDROID_SDK_ROOT/ndk/" || echo "NDK directory not found"
+          echo "=== aidl location ==="
+          find "$ANDROID_SDK_ROOT" -name "aidl" -type f 2>/dev/null || echo "aidl not found"
 
       - name: Cache Buildozer venv
         uses: actions/cache@v4
