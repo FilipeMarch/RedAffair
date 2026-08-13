@@ -1,11 +1,35 @@
-      - name: Install Buildozer
+name: Build APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: build-apk-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
         run: |
-          python -m venv ~/.venv
-          source ~/.venv/bin/activate
-          pip install --upgrade pip setuptools wheel
-          # Use a valid reference (master branch) instead of a non‑existent SHA
-          pip install git+https://github.com/kivy/buildozer.git@master
-          echo "~/.venv/bin" >> $GITHUB_PATH
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openjdk-17-jdk-headless git wget unzip zip curl build-essential autoconf automake libtool pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev lib32stdc++6 lib32z1
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install Android SDK & NDK
         env:
@@ -19,8 +43,40 @@
           mv cmdline-tools latest
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-          # Install exact NDK version that exists in the repository
+          # Install the exact NDK version that exists in the SDK repository
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "ndk;27.0.11902837"
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
           echo "$ANDROID_SDK_ROOT" >> $GITHUB_PATH
           echo "$ANDROID_NDK_ROOT" >> $GITHUB_PATH
+
+      - name: Cache Buildozer venv
+        uses: actions/cache@v4
+        with:
+          path: ~/.venv
+          key: buildozer-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
+
+      - name: Install Buildozer
+        run: |
+          python -m venv ~/.venv
+          source ~/.venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          # Use the official stable branch instead of a non‑existent commit
+          pip install git+https://github.com/kivy/buildozer.git@master
+          echo "~/.venv/bin" >> $GITHUB_PATH
+
+      - name: Build APK with Buildozer
+        env:
+          ANDROIDSDK: ${{ runner.temp }}/android-sdk
+          ANDROIDNDK: ${{ runner.temp }}/android-ndk
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+        run: |
+          source ~/.venv/bin/activate
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: redaffair-apk
+          path: bin/*.apk
