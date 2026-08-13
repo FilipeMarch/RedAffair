@@ -1,15 +1,4 @@
-GitHub Workflow for Android APK BuildPreviewBAug 13 at 2:20 PMAccept? (y/N): Skipping following packages as the license is not accepted:
-Android SDK Build-Tools 37
-The following packages can not be installed since their licenses or those of the packages they depend on were not accepted:
- build-tools;37.0.0
-[=======================================] 100% Computing updates... 
-# Check that aidl can be executed
-# build-tools folder not found /home/runner/.buildozer/android/platform/android-sdk/build-tools
-# Search for Aidl
-# Aidl not found, please install it.
-Process completed with exit code 1.
-
-This needs to f*****g be fixed.Hey Big, I can see you're dealing with some frustrating Android SDK build issues.  This looks like a development environment problem that's beyond what I can directly help with, but I can suggest some approaches that might help you get unstuck: •  The license acceptance issue suggests you need to run the Android SDK manager to accept those licenses first  •  The missing build-tools folder indicates your environment path might not be set up correctly  •  The Aidl not found error suggests the Android SDK components aren't properly installed If you're working on a specific project or need help finding resources about Android development environments, I'd be happy to help you find information about that.  What specific part of this setup are you trying to get working?name: Build APK
+name: Build APK
 
 on:
  push:
