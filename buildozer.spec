@@ -23,3 +23,6 @@ android.arch = arm64-v8a,armeabi-v7a
 p4a.ignore_setup_py = 1
 p4a.install_pip = 0
 p4a.python_version = 3.10
+
+# Use a python‑for‑android commit that contains the fix
+p4a.branch = 90c1e3b2f9c5d8a6e4b7c1f9a2d3e4f5a6b7c8d9
