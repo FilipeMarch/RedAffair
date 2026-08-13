@@ -10,7 +10,7 @@ title = Red Affair
  orientation = all
  icon.filename = %(source.dir)s/RAlogos.png
 
- [buildozer]
+[buildozer]
  log_level = 2
  build_dir = .buildozer
  bin_dir = bin
