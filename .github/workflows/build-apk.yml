@@ -1,95 +1,35 @@
-name: Build APK
-
-on:
-  push:
-    tags: ['v*']
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  actions: read
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    concurrency:
-      group: build-apk-${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install system packages
-        run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            openjdk-17-jdk-headless \
-            git wget unzip zip curl \
-            build-essential autoconf automake libtool \
-            pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
-            lib32stdc++6 lib32z1
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: "pip"
-
-      - name: Install Android SDK & NDK
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-        run: |
-          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-          cd "$ANDROID_SDK_ROOT/cmdline-tools"
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip -q tools.zip
-          mv cmdline-tools latest
-          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
-            "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;37.0.0" \
-            "ndk;27.0.11902837"
-
-          echo "$ANDROID_SDK_ROOT/build-tools/37.0.0" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
-      - name: Cache Buildozer venv
-        uses: actions/cache@v4
-        with:
-          path: ~/.venv
-          key: buildozer-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            buildozer-${{ runner.os }}-
-
-      - name: Install Buildozer
-        run: |
-          python -m venv ~/.venv
-          source ~/.venv/bin/activate
-          pip install --upgrade pip setuptools wheel
-          pip install git+https://github.com/kivy/buildozer.git@master
-          echo "$HOME/.venv/bin" >> $GITHUB_PATH
-
-      - name: Clean Buildozer cache
-        run: rm -rf .buildozer/android/platform/build-*
-
-      - name: Build APK with Buildozer
-        env:
-          ANDROIDSDK: ${{ runner.temp }}/android-sdk
-          ANDROIDNDK: ${{ runner.temp }}/android-sdk/ndk/27.0.11902837
-          ANDROIDAPI: "33"
-          ANDROIDMINAPI: "24"
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-        run: |
-          source ~/.venv/bin/activate
-          yes | buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: redaffair-apk
-          path: bin/*.apk
+Categories: Games
+License: Apache-2.0
+SourceCode: https://github.com/correspondenceadg-cmyk/Red-Affair
+Name: Red Affair
+Summary: Text-based detective mystery set in a retro-sci-fi space diner
+Description: |
+  A short, narrative-driven detective game inspired by classic text adventures.
+  You play as a detective investigating a murder in a space diner on the edge
+  of the Pillars of Creation. Choose your political leaning, interrogate
+  suspects, gather evidence, and decide whether to pursue justice or embrace
+  chaos. Minimalist text interface with deep branching dialogue and multiple
+  endings.
+AuthorName: Tara Moralés / SiliCast Games©
+AuthorEmail: correspondenceadg@gmail.com
+RepoType: git
+Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.114
+CurrentVersionCode: 1114
+Builds:
+  - versionName: 1.114
+    versionCode: 1114
+    commit: v1.114
+    subdir: .
+    gradle:
+      - yes
+    prebuild:
+      - echo "android { defaultConfig { applicationId \"ws.tilda.sentryprotocol.redaffair\" } }" > build.gradle
+      - echo "apply plugin: 'com.android.application'" >> build.gradle
+    build:
+      - pip install --upgrade buildozer python-for-android
+      - buildozer android debug
+    ndk: 27.0.11902837
+    sdk: 33
