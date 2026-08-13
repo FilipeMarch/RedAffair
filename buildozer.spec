@@ -1,5 +1,3 @@
-# buildozer.spec
-
 [app]
 title = Red Affair
 package.name = ws.tilda.sentryprotocol.redaffair
