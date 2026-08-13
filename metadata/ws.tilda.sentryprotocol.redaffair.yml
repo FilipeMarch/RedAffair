@@ -10,30 +10,26 @@ Description: |
   suspects, gather evidence, and decide whether to pursue justice or embrace
   chaos. Minimalist text interface with deep branching dialogue and multiple
   endings.
-
 AuthorName: Tara Moralés / SiliCast Games©
 AuthorEmail: correspondenceadg@gmail.com
 RepoType: git
 Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
-
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-
 CurrentVersion: 1.114
 CurrentVersionCode: 1114
-
 Builds:
   - versionName: 1.114
     versionCode: 1114
     commit: v1.114
     subdir: .
     gradle:
-      - yes               # keep the default gradle wrapper behaviour
+      - yes
     prebuild:
       - echo "android { defaultConfig { applicationId \"ws.tilda.sentryprotocol.redaffair\" } }" > build.gradle
       - echo "apply plugin: 'com.android.application'" >> build.gradle
     build:
       - pip install --upgrade buildozer python-for-android
-      - buildozer android debug   # the Docker image already has all SDK/NDK files
+      - buildozer android debug
     ndk: r27c
     sdk: 33
