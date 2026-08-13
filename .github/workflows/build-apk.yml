@@ -1,4 +1,3 @@
-# .github/workflows/build-apk.yml
 name: Build APK
 
 on:
@@ -23,8 +22,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            openjdk-17-jdk-headless git wget unzip zip curl build-essential autoconf automake \
-            libtool pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
+            openjdk-17-jdk-headless \
+            git wget unzip zip curl \
+            build-essential autoconf automake libtool \
+            pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
             lib32stdc++6 lib32z1
           sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
@@ -38,7 +39,6 @@ jobs:
       - name: Install Android SDK & NDK
         env:
           ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-          ANDROID_NDK_ROOT: ${{ runner.temp }}/android-ndk
         run: |
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
           cd "$ANDROID_SDK_ROOT/cmdline-tools"
@@ -48,19 +48,15 @@ jobs:
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
-
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" \
-            "platforms;android-36" \
+            "platforms;android-33" \
             "build-tools;37.0.0" \
             "ndk;27.0.11902837"
 
           echo "$ANDROID_SDK_ROOT/build-tools/37.0.0" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
-          echo "$ANDROID_SDK_ROOT" >> $GITHUB_PATH
-          echo "$ANDROID_NDK_ROOT" >> $GITHUB_PATH
 
       - name: Cache Buildozer venv
         uses: actions/cache@v4
@@ -76,14 +72,17 @@ jobs:
           source ~/.venv/bin/activate
           pip install --upgrade pip setuptools wheel
           pip install git+https://github.com/kivy/buildozer.git@master
-          echo "~/.venv/bin" >> $GITHUB_PATH
+          echo "$HOME/.venv/bin" >> $GITHUB_PATH
+
+      - name: Clean Buildozer cache
+        run: rm -rf .buildozer/android/platform/build-*
 
       - name: Build APK with Buildozer
         env:
           ANDROIDSDK: ${{ runner.temp }}/android-sdk
-          ANDROIDNDK: ${{ runner.temp }}/android-ndk/ndk/27.0.11902837
-          ANDROIDAPI: "36"
-          ANDROIDMINAPI: "21"
+          ANDROIDNDK: ${{ runner.temp }}/android-sdk/ndk/27.0.11902837
+          ANDROIDAPI: "33"
+          ANDROIDMINAPI: "24"
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
         run: |
           source ~/.venv/bin/activate
