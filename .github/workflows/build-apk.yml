@@ -22,7 +22,7 @@ jobs:
       ANDROID_NDK_VERSION: 27.0.11902837
       ANDROID_API: 33
       ANDROID_MINAPI: 24
-      BUILD_TOOLS: 37.0.0
+      BUILD_TOOLS: 35.0.0
 
     steps:
       - uses: actions/checkout@v4
@@ -41,8 +41,9 @@ jobs:
 
       - name: Set JAVA_HOME to JDK 17
         run: |
-          echo "JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64" >> $GITHUB_ENV
-          echo "/usr/lib/jvm/temurin-17-jdk-amd64/bin" >> $GITHUB_PATH
+          JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+          echo "$JAVA_HOME/bin" >> $GITHUB_PATH
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,7 +62,7 @@ jobs:
 
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
-          echo "y" | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses || true
 
           sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" \
@@ -141,7 +142,7 @@ jobs:
           path: bin/*.apk
 
       - name: Upload build log on failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
