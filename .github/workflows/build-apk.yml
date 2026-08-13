@@ -1,3 +1,4 @@
+# .github/workflows/build-apk.yml
 name: Build APK
 
 on:
@@ -46,15 +47,17 @@ jobs:
           mv cmdline-tools latest
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" \
             "platforms;android-36" \
-            "build-tools;37.0.0"
+            "build-tools;37.0.0" \
+            "ndk;27.0.11902837"
 
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "ndk;27.0.11902837"
-
-          # Accept all licenses **after** the above packages are installed
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+          echo "$ANDROID_SDK_ROOT/build-tools/37.0.0" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
           echo "$ANDROID_SDK_ROOT" >> $GITHUB_PATH
           echo "$ANDROID_NDK_ROOT" >> $GITHUB_PATH
@@ -78,11 +81,13 @@ jobs:
       - name: Build APK with Buildozer
         env:
           ANDROIDSDK: ${{ runner.temp }}/android-sdk
-          ANDROIDNDK: ${{ runner.temp }}/android-ndk
+          ANDROIDNDK: ${{ runner.temp }}/android-ndk/ndk/27.0.11902837
+          ANDROIDAPI: "36"
+          ANDROIDMINAPI: "21"
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
         run: |
           source ~/.venv/bin/activate
-          buildozer android debug
+          yes | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
