@@ -1,4 +1,5 @@
 [app]
+
 title = Red Affair
  package.name = ws.tilda.sentryprotocol.redaffair
  package.domain = ws.tilda.sentryprotocol
@@ -11,6 +12,7 @@ title = Red Affair
  icon.filename = %(source.dir)s/RAlogos.png
 
 [buildozer]
+
  log_level = 2
  build_dir = .buildozer
  bin_dir = bin
