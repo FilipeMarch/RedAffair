@@ -2,7 +2,8 @@ name: Build APK
 
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,15 @@ jobs:
     concurrency:
       group: build-apk-${{ github.ref }}
       cancel-in-progress: true
+
+    env:
+      ANDROID_SDK_ROOT: /home/runner/work/_temp/android-sdk
+      ANDROID_HOME: /home/runner/work/_temp/android-sdk
+      ANDROID_NDK_VERSION: 27.0.11902837
+      ANDROID_API: 33
+      ANDROID_MINAPI: 24
+      BUILD_TOOLS: 35.0.0
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,17 +40,77 @@ jobs:
           sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
 
+      - name: Set JAVA_HOME to JDK 17
+        run: |
+          JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+          echo "$JAVA_HOME/bin" >> $GITHUB_PATH
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
 
+      - name: Force Python 3.10 for p4a venv
+        run: |
+          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+          sudo update-alternatives --set python3 /usr/bin/python3.10
+          python3 --version
+
+      - name: Install Android SDK & NDK
+        run: |
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip -q tools.zip
+          mv cmdline-tools latest
+          rm tools.zip
+
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-${ANDROID_API}" \
+            "build-tools;${BUILD_TOOLS}" \
+            "ndk;${ANDROID_NDK_VERSION}"
+
+          (yes "" 2>/dev/null || true) | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+
+          if [ ! -d "$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}" ]; then
+            echo "Build tools not found in expected location!"
+            find "$ANDROID_SDK_ROOT" -name "aidl"
+            exit 1
+          fi
+
+          ls -la "$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}"
+          ls -la "$ANDROID_SDK_ROOT/ndk/${ANDROID_NDK_VERSION}"
+
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}" >> $GITHUB_PATH
+
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROIDSDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROIDAPI=$ANDROID_API" >> $GITHUB_ENV
+          echo "ANDROIDMINAPI=$ANDROID_MINAPI" >> $GITHUB_ENV
+
+      - name: Verify SDK/NDK layout
+        run: |
+          echo "=== Build tools ==="
+          ls -la "$ANDROID_SDK_ROOT/build-tools/" || echo "Build tools directory not found"
+          echo "=== NDK ==="
+          ls -la "$ANDROID_SDK_ROOT/ndk/" || echo "NDK directory not found"
+          echo "=== aidl location ==="
+          find "$ANDROID_SDK_ROOT" -name "aidl" -type f 2>/dev/null || echo "aidl not found"
+
       - name: Cache Buildozer venv
         uses: actions/cache@v4
         with:
           path: ~/.venv
-          key: buildozer-venv-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-venv-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-${{ github.run_id }}
           restore-keys: |
             buildozer-venv-${{ runner.os }}-
 
@@ -52,11 +122,26 @@ jobs:
           pip install git+https://github.com/kivy/buildozer.git@master
           echo "$HOME/.venv/bin" >> $GITHUB_PATH
 
+      - name: Patch buildozer.spec paths
+        run: |
+          sed -i "s|android.sdk_path = .*|android.sdk_path = $ANDROID_SDK_ROOT|" buildozer.spec
+          sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
+          echo "=== Patched spec paths ==="
+          grep -E "android\\.(sdk|ndk)_path" buildozer.spec
+
+      - name: Clean Buildozer platform cache
+        run: rm -rf .buildozer/android/platform/build-*
+
       - name: Build APK
         run: |
           source ~/.venv/bin/activate
-          # Force Buildozer to accept licenses and use the pre‑defined SDK paths
-          yes | buildozer android debug 2>&1 | tee build.log
+          export ANDROIDSDK="$ANDROID_SDK_ROOT"
+          export ANDROIDNDK="$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
+          export ANDROIDAPI="$ANDROID_API"
+          export ANDROIDMINAPI="$ANDROID_MINAPI"
+          export GRADLE_OPTS="-Dorg.gradle.daemon=false"
+          export PATH="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS:$PATH"
+          buildozer -v android debug 2>&1 | tee build.log
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -65,7 +150,7 @@ jobs:
           path: bin/*.apk
 
       - name: Upload build log on failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
