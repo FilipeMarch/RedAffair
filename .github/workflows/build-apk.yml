@@ -18,8 +18,6 @@ jobs:
       cancel-in-progress: true
 
     env:
-      ANDROID_SDK_ROOT: /home/runner/work/_temp/android-sdk
-      ANDROID_HOME: /home/runner/work/_temp/android-sdk
       ANDROID_NDK_VERSION: 27.0.11902837
       ANDROID_API: 33
       ANDROID_MINAPI: 24
@@ -58,12 +56,22 @@ jobs:
           sudo update-alternatives --set python3 /usr/bin/python3.10
           python3 --version
 
-      - name: Setup Android SDK (automatically accepts licenses)
-        uses: actions/setup-android@v4
-        with:
-          api-level: ${{ env.ANDROID_API }}
-          build-tools-version: ${{ env.BUILD_TOOLS }}
-          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          sdkmanager --install \
+            "build-tools;${BUILD_TOOLS}" \
+            "platforms;android-${ANDROID_API}" \
+            "ndk;${ANDROID_NDK_VERSION}"
+
+      - name: Verify SDK paths
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "NDK path: $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
+          ls "$ANDROID_SDK_ROOT/ndk/" || echo "NDK directory not found"
+          ls "$ANDROID_SDK_ROOT/build-tools/" || echo "build-tools directory not found"
 
       - name: Set SDK environment variables
         run: |
@@ -82,7 +90,7 @@ jobs:
 
       - name: Install Buildozer
         run: |
-          python -m venv ~/.venv
+          python3.10 -m venv ~/.venv
           source ~/.venv/bin/activate
           pip install --upgrade pip setuptools wheel
           pip install git+https://github.com/kivy/buildozer.git@master
@@ -107,16 +115,22 @@ jobs:
           export ANDROIDMINAPI="$ANDROID_MINAPI"
           export GRADLE_OPTS="-Dorg.gradle.daemon=false"
           export PATH="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS:$PATH"
-          buildozer -v android debug 2>&1 | tee build.log
+          yes | buildozer -v android debug 2>&1 | tee build.log
+
+      - name: List bin directory
+        if: always()
+        run: ls -la bin/ || echo "bin/ does not exist"
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
           path: bin/*.apk
+          if-no-files-found: error
 
-      - name: Upload build log on failure
-        if: always()
+      - name: Upload build log
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
