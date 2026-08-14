@@ -1,15 +1,3 @@
-[app]
-title = Red Affair
-package.name = ws.tilda.sentryprotocol.redaffair
-package.domain = ws.tilda.sentryprotocol
-source.dir = .
-source.include_exts = py,png,jpg,ttf,ogg,wav
-version = 1.114
-version.code = 1114
-requirements = python3,kivy,charset_normalizer==3.2.0
-orientation = all
-icon.filename = %(source.dir)s/RAlogos.png
-
 [buildozer]
 log_level = 2
 build_dir = .buildozer
@@ -25,4 +13,5 @@ android.ndk_path = /home/runner/work/_temp/android-sdk/ndk/27.0.11902837
 p4a.ignore_setup_py = 1
 p4a.install_pip = 1
 p4a.python_version = 3.10
+p4a.hostpython = /usr/bin/python3.10   <-- Add this line
 p4a.branch = master
