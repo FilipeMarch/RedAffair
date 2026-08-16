@@ -108,7 +108,6 @@ jobs:
         run: |
           sed -i "s|android.sdk_path = .*|android.sdk_path = $ANDROID_SDK_ROOT|" buildozer.spec
           sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
-          grep -E "android\\.(sdk|ndk)_path" buildozer.spec
 
       - name: Build New Butthole
         run: |
