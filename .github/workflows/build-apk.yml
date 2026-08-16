@@ -108,18 +108,18 @@ jobs:
           fi
 
       - name: Build APK
-  run: |
-    set -o pipefail
-    source ~/.venv/bin/activate
-    export ANDROIDSDK="$ANDROID_SDK_ROOT"
-    export ANDROIDNDK="$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
-    export ANDROIDAPI="$ANDROID_API"
-    export ANDROIDMINAPI="$ANDROID_MINAPI"
-    export GRADLE_OPTS="-Dorg.gradle.daemon=false"
-    export PATH="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS:$PATH"
-    export JAVA_OPTS="--add-modules java.se --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED"
-    export _JAVA_OPTIONS="$JAVA_OPTS"
-    yes | buildozer -v android debug 2>&1 | tee build.log
+        run: |
+          set -o pipefail
+          source ~/.venv/bin/activate
+          export ANDROIDSDK="$ANDROID_SDK_ROOT"
+          export ANDROIDNDK="$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
+          export ANDROIDAPI="$ANDROID_API"
+          export ANDROIDMINAPI="$ANDROID_MINAPI"
+          export GRADLE_OPTS="-Dorg.gradle.daemon=false"
+          export PATH="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS:$PATH"
+          export JAVA_OPTS="--add-modules java.se --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED"
+          export _JAVA_OPTIONS="$JAVA_OPTS"
+          yes | buildozer -v android debug 2>&1 | tee build.log
 
       - name: List bin directory
         if: always()
