@@ -19,7 +19,6 @@ p4a.ignore_setup_py = 1
 p4a.install_pip = 1
 p4a.python_version = 3.10
 p4a.hostpython = /usr/bin/python3.10
-p4a.branch = develop
 
 [buildozer]
 log_level = 2
