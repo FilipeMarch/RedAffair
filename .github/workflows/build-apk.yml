@@ -1,4 +1,4 @@
-name: Build APK
+name: Build A Poop Kave
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install system packages
+      - name: Install Poop auxiliary packages
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -34,19 +34,19 @@ jobs:
           sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
 
-      - name: Set up JDK 17
+      - name: Set up Pooping Station
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Python
+      - name: Start Up Poopin
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
 
-      - name: Install Buildozer
+      - name: Install Built Poop Into Toilet
         run: |
           python3.10 -m venv ~/.venv
           source ~/.venv/bin/activate
@@ -54,7 +54,7 @@ jobs:
           pip install git+https://github.com/kivy/buildozer.git@master
           echo "$HOME/.venv/bin" >> $GITHUB_PATH
 
-      - name: Install Android SDK & NDK
+      - name: Install A Bidet
         run: |
           export ANDROID_SDK_ROOT="${{ runner.temp }}/android-sdk"
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
@@ -85,13 +85,13 @@ jobs:
           echo "ANDROIDAPI=$ANDROID_API" >> $GITHUB_ENV
           echo "ANDROIDMINAPI=$ANDROID_MINAPI" >> $GITHUB_ENV
 
-      - name: Build APK
+      - name: Build A New Butthole
         run: |
           set -o pipefail
           source ~/.venv/bin/activate
           yes | buildozer -v android debug 2>&1 | tee build.log
 
-      - name: Upload APK
+      - name: Upload A Pic of Krap
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -99,7 +99,7 @@ jobs:
           path: bin/*.apk
           if-no-files-found: error
 
-      - name: Upload build log
+      - name: Upload World Record Log of the Log
         if: always()
         uses: actions/upload-artifact@v4
         with:
