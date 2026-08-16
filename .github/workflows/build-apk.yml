@@ -10,134 +10,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    concurrency:
-      group: build-apk-${{ github.ref }}
-      cancel-in-progress: true
-
-    env:
-      ANDROID_NDK_VERSION: 28.0.12433566
-      ANDROID_API: 33
-      ANDROID_MINAPI: 24
-      BUILD_TOOLS: 35.0.0
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install system packages
-        run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            git wget unzip zip curl \
-            build-essential autoconf automake \
-            libtool pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
-            lib32stdc++6 lib32z1 ccache
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Build with Buildozer
+        uses: pitonio/buildozer-action@v1
         with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: "pip"
-
-      - name: Force Python 3.10 for p4a venv
-        run: |
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
-          sudo update-alternatives --set python3 /usr/bin/python3.10
-          python3 --version
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK packages
-        run: |
-          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --install \
-            "build-tools;${BUILD_TOOLS}" \
-            "platforms;android-${ANDROID_API}" \
-            "ndk;${ANDROID_NDK_VERSION}"
-
-      - name: Verify SDK paths
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls "$ANDROID_SDK_ROOT/ndk/" || echo "NDK directory not found"
-          ls "$ANDROID_SDK_ROOT/build-tools/" || echo "build-tools not found"
-
-      - name: Set SDK environment variables
-        run: |
-          echo "ANDROIDSDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
-          echo "ANDROIDAPI=$ANDROID_API" >> $GITHUB_ENV
-          echo "ANDROIDMINAPI=$ANDROID_MINAPI" >> $GITHUB_ENV
-
-      - name: Cache Buildozer venv
-        uses: actions/cache@v4
-        with:
-          path: ~/.venv
-          key: buildozer-venv-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-venv-${{ runner.os }}-
-
-      - name: Install Buildozer
-        run: |
-          python3.10 -m venv ~/.venv
-          source ~/.venv/bin/activate
-          pip install --upgrade pip setuptools wheel
-          pip install git+https://github.com/kivy/buildozer.git@master
-          echo "$HOME/.venv/bin" >> $GITHUB_PATH
-
-      - name: Patch buildozer.spec paths
-        run: |
-          sed -i "s|android.sdk_path = .*|android.sdk_path = $ANDROID_SDK_ROOT|" buildozer.spec
-          sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
-          grep -E "android\\.(sdk|ndk)_path" buildozer.spec
-
-      - name: Patch sdkmanager for Java 17
-        run: |
-          SDKMANAGER="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
-          if [ -f "$SDKMANAGER" ]; then
-            # Replace the default Java command with the full path to Java 17
-            sed -i 's|^JAVA_CMD="java"|JAVA_CMD="'$JAVA_HOME'/bin/java"|' "$SDKMANAGER"
-            # Keep the JVM options patch (optional, but safe)
-            sed -i 's|DEFAULT_JVM_OPTS=""|DEFAULT_JVM_OPTS="--add-modules java.se --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED"|' "$SDKMANAGER"
-            echo "Patched $SDKMANAGER"
-          else
-            echo "Old sdkmanager not found, skipping patch"
-          fi
-
-      - name: Build APK
-        run: |
-          set -o pipefail
-          source ~/.venv/bin/activate
-          export ANDROIDSDK="$ANDROID_SDK_ROOT"
-          export ANDROIDNDK="$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
-          export ANDROIDAPI="$ANDROID_API"
-          export ANDROIDMINAPI="$ANDROID_MINAPI"
-          export GRADLE_OPTS="-Dorg.gradle.daemon=false"
-          export PATH="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS:$PATH"
-          export JAVA_TOOL_OPTIONS="--add-modules java.se --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED"
-          yes | buildozer -v android debug 2>&1 | tee build.log
-
-      - name: List bin directory
-        if: always()
-        run: ls -la bin/ || echo "bin/ does not exist"
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
+          workdir: .
+          android_accept_sdk_license: true
+      - uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
           path: bin/*.apk
-          if-no-files-found: error
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build.log
