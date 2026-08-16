@@ -100,6 +100,16 @@ jobs:
           sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
           grep -E "android\\.(sdk|ndk)_path" buildozer.spec
 
+       - name: Patch sdkmanager for Java 17
+         run: |
+     SDKMANAGER="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
+     if ; then
+       sed -i 's|DEFAULT_JVM_OPTS=""|DEFAULT_JVM_OPTS="--add-modules java.se --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED"|' "$SDKMANAGER"
+       echo "Patched $SDKMANAGER"
+     else
+       echo "Old sdkmanager not found, skipping patch"
+    fi
+
       - name: Build APK
         run: |
           set -o pipefail
