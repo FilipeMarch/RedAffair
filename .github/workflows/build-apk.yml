@@ -64,7 +64,6 @@ jobs:
           rm tools.zip
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
-          # Patch sdkmanager to use Java 17
           SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           sed -i 's|^JAVA_CMD="java"|JAVA_CMD="'$JAVA_HOME'/bin/java"|' "$SDKMANAGER"
 
@@ -75,12 +74,13 @@ jobs:
             "build-tools;${BUILD_TOOLS}" \
             "ndk;${ANDROID_NDK_VERSION}"
 
-          # Export ALL relevant SDK/NDK environment variables
+          mkdir -p ~/.buildozer/android/platform
+          ln -sf "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" ~/.buildozer/android/platform/android-ndk-r28c
+
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROIDSDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROIDNDK=~/.buildozer/android/platform/android-ndk-r28c" >> $GITHUB_ENV
           echo "ANDROIDAPI=$ANDROID_API" >> $GITHUB_ENV
           echo "ANDROIDMINAPI=$ANDROID_MINAPI" >> $GITHUB_ENV
 
@@ -88,7 +88,7 @@ jobs:
         run: |
           echo "SDK root: $ANDROID_SDK_ROOT"
           ls -la "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" || echo "NDK missing!"
-          ls -la "$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS" || echo "Build-tools missing!"
+          ls -la ~/.buildozer/android/platform/android-ndk-r28c || echo "Symlink missing!"
 
       - name: Cache Poop 
         uses: actions/cache@v4
