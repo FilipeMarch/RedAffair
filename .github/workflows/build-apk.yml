@@ -64,6 +64,7 @@ jobs:
           rm tools.zip
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
+          # Patch sdkmanager to use Java 17
           SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           sed -i 's|^JAVA_CMD="java"|JAVA_CMD="'$JAVA_HOME'/bin/java"|' "$SDKMANAGER"
 
@@ -74,9 +75,12 @@ jobs:
             "build-tools;${BUILD_TOOLS}" \
             "ndk;${ANDROID_NDK_VERSION}"
 
+          # --- THE FINAL SYMLINK TRICK ---
           mkdir -p ~/.buildozer/android/platform
+          ln -sf "$ANDROID_SDK_ROOT" ~/.buildozer/android/platform/android-sdk
           ln -sf "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" ~/.buildozer/android/platform/android-ndk-r28c
 
+          # Export env vars (just for safety)
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROIDSDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
@@ -104,17 +108,12 @@ jobs:
           pip install git+https://github.com/kivy/buildozer.git@master
           echo "$HOME/.venv/bin" >> $GITHUB_PATH
 
-      - name: Patch butthole
-        run: |
-          sed -i "s|android.sdk_path = .*|android.sdk_path = $ANDROID_SDK_ROOT|" buildozer.spec
-          sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
-
       - name: Build New Butthole
         run: |
           set -o pipefail
           source ~/.venv/bin/activate
           export ANDROIDSDK="$ANDROID_SDK_ROOT"
-          export ANDROIDNDK="$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
+          export ANDROIDNDK=~/.buildozer/android/platform/android-ndk-r28c
           export ANDROIDAPI="$ANDROID_API"
           export ANDROIDMINAPI="$ANDROID_MINAPI"
           export GRADLE_OPTS="-Dorg.gradle.daemon=false"
