@@ -34,44 +34,40 @@ jobs:
           sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
 
-      - name: Set up JDK 17
+      - name: Set up toilet 
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Python
+      - name: Set up splash shield
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
 
-      - name: Force Poop 3.10 for pooping venv
+      - name: Force Poop 3.10 for big poopin
         run: |
           sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
           sudo update-alternatives --set python3 /usr/bin/python3.10
           python3 --version
 
-      - name: Download & Patch Android SDK manually
+      - name: Brace for pooping
         run: |
           export ANDROID_SDK_ROOT="${{ runner.temp }}/android-sdk"
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
           cd "$ANDROID_SDK_ROOT/cmdline-tools"
           
-          # Download command line tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip -O tools.zip
           unzip -q tools.zip
           mv cmdline-tools latest
           rm tools.zip
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
 
-          # --- THE PERMANENT FIX ---
-          # Patch sdkmanager's internal JAVA_CMD to use JDK 17
+          # Patch sdkmanager to use Java 17
           SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           sed -i 's|^JAVA_CMD="java"|JAVA_CMD="'$JAVA_HOME'/bin/java"|' "$SDKMANAGER"
-          # --------------------------
 
-          # Accept licenses and install components
           yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
           sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
             "platform-tools" \
@@ -79,20 +75,28 @@ jobs:
             "build-tools;${BUILD_TOOLS}" \
             "ndk;${ANDROID_NDK_VERSION}"
 
-          # Export paths for Buildozer
+          # Export ALL relevant SDK/NDK environment variables
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROIDSDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
           echo "ANDROIDAPI=$ANDROID_API" >> $GITHUB_ENV
           echo "ANDROIDMINAPI=$ANDROID_MINAPI" >> $GITHUB_ENV
 
-      - name: Cache Big Poop
+      - name: Verify Pooping paths
+        run: |
+          echo "SDK root: $ANDROID_SDK_ROOT"
+          ls -la "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" || echo "NDK missing!"
+          ls -la "$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS" || echo "Build-tools missing!"
+
+      - name: Cache Poop 
         uses: actions/cache@v4
         with:
           path: ~/.venv
           key: buildozer-venv-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      - name: Install Big Poop
+      - name: Install Poop into Toilet
         run: |
           python3.10 -m venv ~/.venv
           source ~/.venv/bin/activate
@@ -100,7 +104,13 @@ jobs:
           pip install git+https://github.com/kivy/buildozer.git@master
           echo "$HOME/.venv/bin" >> $GITHUB_PATH
 
-      - name: Build APK
+      - name: Patch butthole
+        run: |
+          sed -i "s|android.sdk_path = .*|android.sdk_path = $ANDROID_SDK_ROOT|" buildozer.spec
+          sed -i "s|android.ndk_path = .*|android.ndk_path = $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION|" buildozer.spec
+          grep -E "android\\.(sdk|ndk)_path" buildozer.spec
+
+      - name: Build New Butthole
         run: |
           set -o pipefail
           source ~/.venv/bin/activate
@@ -116,7 +126,7 @@ jobs:
         if: always()
         run: ls -la bin/ || echo "bin/ does not exist"
 
-      - name: Upload APK
+      - name: Upload World Record Poop
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -124,7 +134,7 @@ jobs:
           path: bin/*.apk
           if-no-files-found: error
 
-      - name: Upload build log
+      - name: Upload pictures of the log
         if: always()
         uses: actions/upload-artifact@v4
         with:
