@@ -13,11 +13,11 @@ icon.filename = %(source.dir)s/RAlogos.png
 android.accept_sdk_license = True
 android.api = 33
 android.minapi = 24
-android.ndk = 27.0.11902837
+android.ndk = 28.0.12433566
 android.build_tools_version = 35.0.0
-android.arch = arm64-v8a,armeabi-v7a
+android.archs = arm64-v8a,armeabi-v7a
 android.sdk_path = /usr/local/lib/android/sdk
-android.ndk_path = /usr/local/lib/android/sdk/ndk/27.0.11902837
+android.ndk_path = /usr/local/lib/android/sdk/ndk/28.0.12433566
 
 p4a.ignore_setup_py = 1
 p4a.install_pip = 1
