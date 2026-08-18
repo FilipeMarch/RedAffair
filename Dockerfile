@@ -9,11 +9,15 @@ ENV BUILD_TOOLS=35.0.0
 ENV ANDROID_API=33
 ENV BUILDOZER_ACCEPT_ROOT_USER=1
 
+# Add AUTORECONF_OPTS to force libtoolize
+ENV AUTORECONF_OPTS="-i"
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jdk-headless \
     python3.10 python3.10-dev python3.10-venv python3-pip \
     git wget unzip zip curl \
     build-essential autoconf automake libtool \
+    autoconf-archive \
     pkg-config libffi-dev libssl-dev libncurses5-dev libjpeg-dev zlib1g-dev \
     lib32stdc++6 lib32z1 ccache \
     && rm -rf /var/lib/apt/lists/*
@@ -51,4 +55,4 @@ RUN python3 -m pip install --upgrade pip setuptools wheel && \
 WORKDIR /app
 COPY . /app
 
-CMD ["bash", "-c", "yes | buildozer -v android debug 2>&1 | tee build.log"]
+CMD ["bash", "-c", "set -o pipefail && yes | buildozer -v android debug 2>&1 | tee build.log"]
