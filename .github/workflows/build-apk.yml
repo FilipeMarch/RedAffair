@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"   # Bumped from 3.12 to 3.13
+          python-version: "3.13"
 
       - name: Install ksproject from source
         run: |
@@ -24,11 +24,7 @@ jobs:
 
       - name: Initialize ksproject
         run: |
-          ksproject init \
-            --name "Red Affair" \
-            --package ws.tilda.sentryprotocol.redaffair \
-            --entry main.py \
-            --non-interactive
+          ksproject init --name "Red Affair"
 
       - name: Build Release APK
         run: |
