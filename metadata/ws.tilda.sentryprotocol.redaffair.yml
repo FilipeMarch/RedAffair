@@ -26,10 +26,9 @@ Builds:
     gradle:
       - yes
     prebuild:
-      - echo "android { defaultConfig { applicationId \"ws.tilda.sentryprotocol.redaffair\" } }" > build.gradle
-      - echo "apply plugin: 'com.android.application'" >> build.gradle
+      - pip install ksproject
     build:
-      - pip install --upgrade buildozer python-for-android
-      - buildozer android debug
-    ndk: 27.0.11902837
-    sdk: 37
+      - ksproject init --name "Red Affair" --package ws.tilda.sentryprotocol.redaffair --entry main.py --non-interactive
+      - ksproject build --target android --release
+    ndk: 28.0.12433566
+    sdk: 35
