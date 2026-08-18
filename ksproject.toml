@@ -2,6 +2,8 @@
 name = "Red Affair"
 package = "ws.tilda.sentryprotocol.redaffair"
 entry_point = "main.py"
+version = "1.210.1"
+version_code = 12101
 requirements = [
     "kivy",
     "charset_normalizer==2.1.1"
