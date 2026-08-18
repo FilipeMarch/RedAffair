@@ -1,4 +1,4 @@
-name: Build A Poop Knife
+name: Build APK
 
 on:
   push:
@@ -17,20 +17,24 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Make Poop Knife Blank
+      - name: Install uv
+        run: |
+          pip install uv
+
+      - name: Install ksproject from source
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/kivy-school/ksproject.git
 
-      - name: Make Poop Knife Sharp
+      - name: Initialize ksproject
         run: |
           ksproject init --name "Red Affair"
 
-      - name: Build Poop Knife Handle and Attach
+      - name: Build Release APK
         run: |
           ksproject build --target android --release
 
-      - name: Assemble A Poop Knife
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
