@@ -16,12 +16,12 @@ RepoType: git
 Repo: https://github.com/correspondenceadg-cmyk/Red-Affair.git
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.114
-CurrentVersionCode: 1114
+CurrentVersion: 1.210.1
+CurrentVersionCode: 12101
 Builds:
-  - versionName: 1.114
-    versionCode: 1114
-    commit: v1.114
+  - versionName: 1.210.1
+    versionCode: 12101
+    commit: v1.210.1
     subdir: .
     gradle:
       - yes
