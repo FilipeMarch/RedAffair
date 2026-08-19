@@ -19,19 +19,24 @@ jobs:
         sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
         sudo apt-get update -o Acquire::Timeout=10 -o Acquire::Retries=3
         sudo apt-get install -y pkg-config python3-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev
-    - name: Install NDK 28c manually
+    - name: Install SDK & NDK 28c correctly
       run: |
         mkdir -p /home/runner/.buildozer/android/platform
         cd /home/runner/.buildozer/android/platform
+        # Download and unpack commandline tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
-        mkdir -p android-sdk/cmdline-tools/latest
-        mv cmdline-tools/* android-sdk/cmdline-tools/latest/
-        ln -s android-sdk/cmdline-tools/latest android-sdk/tools
+        # Move contents to 'tools' so Buildozer finds sdkmanager at tools/bin/sdkmanager
+        rm -rf android-sdk/tools 2>/dev/null || true
+        mkdir -p android-sdk/tools
+        mv cmdline-tools/latest/* android-sdk/tools/
+        rm -rf cmdline-tools
+        # Accept licenses and install NDK
         export ANDROID_HOME=/home/runner/.buildozer/android/platform/android-sdk
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;28.0.12433566"
-        ln -s $ANDROID_HOME/ndk/28.0.12433566 /home/runner/.buildozer/android/platform/android-ndk-r28c
+        yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+        $ANDROID_HOME/tools/bin/sdkmanager "ndk;28.0.12433566"
+        # Create symlink for Buildozer's expected NDK path
+        ln -sf $ANDROID_HOME/ndk/28.0.12433566 /home/runner/.buildozer/android/platform/android-ndk-r28c
     - name: Install Python build tools
       run: |
         pip install cython buildozer
