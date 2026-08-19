@@ -37,7 +37,7 @@ jobs:
       - name: Build APK
         run: |
           cd redaffair
-          yes | buildozer -v android debug 2>&1 | tee build.log
+          ksproject android build release 2>&1 | tee build.log
 
       - name: Extract errors and warnings from build log
         if: always()
