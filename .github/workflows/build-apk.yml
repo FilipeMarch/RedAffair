@@ -17,38 +17,26 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install uv (official installer)
+      - name: Install uv and ksproject
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-      - name: Install ksproject
-        run: |
-          pip install --upgrade pip
           pip install git+https://github.com/kivy-school/ksproject.git
 
-      - name: Initialize ksproject (creates src/ layout)
-        run: |
-          ksproject init --name "Red Affair"
+      - name: Initialize project (creates src layout)
+        run: ksproject init --name "Red Affair"
 
       - name: Copy app source into package
         run: |
-          cp main.py src/redaffair/
-          cp game.py src/redaffair/
+          cp main.py game.py src/redaffair/
 
-      - name: Override pyproject.toml with our custom one
+      - name: Override pyproject.toml (keep our config)
         run: cp pyproject.toml redaffair/
 
-      - name: Download Kivy wheel for Android (arm64-v8a, Python 3.13)
+      - name: Pre‑download Kivy wheel
         run: |
           mkdir -p redaffair/wheelhouse
-          pip download \
-            --only-binary :all: \
-            --platform android_24_arm64_v8a \
-            --python-version 3.13 \
-            --extra-index-url https://pypi.anaconda.org/kivyschool/simple \
-            --dest redaffair/wheelhouse \
-            kivy==2.3.1
+          pip download --only-binary :all: --platform android_24_arm64_v8a --python-version 3.13 --extra-index-url https://pypi.anaconda.org/kivyschool/simple --dest redaffair/wheelhouse kivy==2.3.1
 
       - name: Build APK
         run: |
