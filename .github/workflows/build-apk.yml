@@ -17,8 +17,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-cython pkg-config libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev
-        pip install buildozer
+        sudo apt-get install -y pkg-config python3-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev
+        pip install cython buildozer
     - name: Build APK
       run: buildozer android debug
     - name: Upload APK
