@@ -22,14 +22,14 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      - name: Debug environment
+      - name: Download Kivy wheel for Android (arm64-v8a, Python 3.13)
         run: |
-          echo "=== PATH ==="
-          echo $PATH
-          echo "=== which uv ==="
-          which uv || echo "uv not found"
-          echo "=== which python3 ==="
-          which python3
+          uv pip download \
+            --platform aarch64-linux-android \
+            --python-version 3.13 \
+            --only-binary :all: \
+            --dest redaffair/wheelhouse \
+            kivy==2.3.1
 
       - name: Install ksproject
         run: |
