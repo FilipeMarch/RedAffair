@@ -25,10 +25,8 @@ Builds:
     subdir: .
     gradle:
       - yes
-    prebuild:
-      - pip install ksproject
     build:
-      - ksproject init --name "Red Affair" --package ws.tilda.sentryprotocol.redaffair --entry main.py --non-interactive
-      - ksproject build --target android --release
+      - pip install anvpy
+      - anvpy build --release
     ndk: 28.0.12433566
     sdk: 35
