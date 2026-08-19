@@ -22,20 +22,24 @@ jobs:
           pip install --upgrade pip
           pip install git+https://github.com/kivy-school/ksproject.git
 
-      - name: Create ksproject config (pyproject.toml)
+      - name: Create pyproject.toml
         run: |
           mkdir -p redaffair
           cat > redaffair/pyproject.toml << 'EOF'
-          [tool.kivy-school]
-          name = "Red Affair"
-          package = "ws.tilda.sentryprotocol.redaffair"
-          entry_point = "main.py"
+          [project]
+          name = "redaffair"
           version = "1.210.1"
-          version_code = 12101
-          requirements = [
+          description = "Red Affair game"
+          requires-python = ">=3.10"
+          dependencies = [
               "kivy",
               "charset_normalizer==2.1.1"
           ]
+
+          [tool.kivy-school]
+          package = "ws.tilda.sentryprotocol.redaffair"
+          entry_point = "main.py"
+          version_code = 12101
           EOF
 
       - name: Build APK
