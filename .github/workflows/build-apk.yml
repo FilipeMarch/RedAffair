@@ -19,23 +19,19 @@ jobs:
         sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
         sudo apt-get update -o Acquire::Timeout=10 -o Acquire::Retries=3
         sudo apt-get install -y pkg-config python3-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev
-    - name: Install SDK & NDK 28c correctly
+    - name: Install NDK 28c manually
       run: |
         mkdir -p /home/runner/.buildozer/android/platform
         cd /home/runner/.buildozer/android/platform
-        # Download and unpack commandline tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
-        # Create the SDK standard folder structure
         mkdir -p android-sdk/cmdline-tools/latest
         mv cmdline-tools/* android-sdk/cmdline-tools/latest/
         rm -rf cmdline-tools
-        # Symlink latest to tools so Buildozer finds it at the expected path
         export ANDROID_HOME=/home/runner/.buildozer/android/platform/android-sdk
         ln -sf $ANDROID_HOME/cmdline-tools/latest $ANDROID_HOME/tools
         yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
         $ANDROID_HOME/tools/bin/sdkmanager "ndk;28.0.12433566"
-        # Create symlink for Buildozer's expected NDK path
         ln -sf $ANDROID_HOME/ndk/28.0.12433566 /home/runner/.buildozer/android/platform/android-ndk-r28c
     - name: Install Python build tools
       run: |
