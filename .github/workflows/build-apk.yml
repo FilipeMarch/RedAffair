@@ -22,6 +22,23 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
+      - name: Install ksproject
+        run: |
+          pip install --upgrade pip
+          pip install git+https://github.com/kivy-school/ksproject.git
+
+      - name: Initialize ksproject (creates src/ layout)
+        run: |
+          ksproject init --name "Red Affair"
+
+      - name: Copy app source into package
+        run: |
+          cp main.py src/redaffair/
+          cp game.py src/redaffair/
+
+      - name: Override pyproject.toml with our custom one
+        run: cp pyproject.toml redaffair/
+
       - name: Download Kivy wheel for Android (arm64-v8a, Python 3.13)
         run: |
           mkdir -p redaffair/wheelhouse
@@ -32,38 +49,6 @@ jobs:
             --extra-index-url https://pypi.anaconda.org/kivyschool/simple \
             --dest redaffair/wheelhouse \
             kivy==2.3.1
-
-      - name: Verify wheel downloaded
-        run: ls -la redaffair/wheelhouse/
-
-      - name: Install ksproject
-        run: |
-          pip install --upgrade pip
-          pip install git+https://github.com/kivy-school/ksproject.git
-
-      - name: Create pyproject.toml
-        run: |
-          mkdir -p redaffair
-          cat > redaffair/pyproject.toml << 'EOF'
-          [project]
-          name = "redaffair"
-          version = "1.222.2"
-          description = "Red Affair game"
-          requires-python = ">=3.10"
-          dependencies = [
-              "kivy",
-              "charset_normalizer==2.1.1"
-          ]
-
-          [tool.kivy-school]
-          package = "ws.tilda.sentryprotocol.redaffair"
-          entry_point = "main.py"
-          version_code = 12222
-
-          [tool.kivy-school.android]
-          package_name = "ws.tilda.sentryprotocol.redaffair"
-          archs = ["arm64-v8a"]
-          EOF
 
       - name: Build APK
         run: |
