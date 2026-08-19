@@ -12,58 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build APK with Pydroid 3
+        uses: pydroid3/buildozer-action@v1
         with:
-          python-version: "3.13"
-
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Install ksproject
-        run: pip install git+https://github.com/kivy-school/ksproject.git
-
-      - name: Create project layout
-        run: |
-          mkdir -p redaffair/src/redaffair
-          cp main.py game.py redaffair/src/redaffair/
-
-      - name: Create pyproject.toml
-        run: |
-          cat > redaffair/pyproject.toml << 'EOF'
-          [project]
-          name = "redaffair"
-          version = "1.222.2"
-          description = "Red Affair game"
-          requires-python = ">=3.10"
-          dependencies = [
-              "kivy",
-              "charset_normalizer==2.1.1"
-          ]
-
-          [tool.kivy-school]
-          package = "ws.tilda.sentryprotocol.redaffair"
-          entry_point = "main.py"
-          version_code = 12222
-
-          [tool.kivy-school.android]
-          package_name = "ws.tilda.sentryprotocol.redaffair"
-          archs = ["arm64-v8a"]
-          EOF
-
-      - name: Build Debug APK (uses pre‑built Kivy)
-        run: |
-          cd redaffair
-          ksproject android build debug
-
-      - name: Build Release APK
-        run: |
-          cd redaffair
-          ksproject android build release
+          workdir: .
+          android_accept_sdk_license: true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
-          path: redaffair/dist/*.apk
+          path: bin/*.apk
           if-no-files-found: error
