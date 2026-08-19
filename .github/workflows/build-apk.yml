@@ -1,7 +1,9 @@
 name: Build APK
+
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -9,14 +11,17 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+
       - name: Install ksproject
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/kivy-school/ksproject.git
+
       - name: Create pyproject.toml
         run: |
           mkdir -p redaffair
@@ -26,18 +31,26 @@ jobs:
           version = "1.222.2"
           description = "Red Affair game"
           requires-python = ">=3.10"
-          dependencies = ["kivy", "charset_normalizer==2.1.1"]
+          dependencies = [
+              "kivy",
+              "charset_normalizer==2.1.1"
+          ]
+
           [tool.kivy-school]
           package = "ws.tilda.sentryprotocol.redaffair"
           entry_point = "main.py"
           version_code = 12222
+
           [tool.kivy-school.android]
           package_name = "ws.tilda.sentryprotocol.redaffair"
+          archs = ["arm64-v8a", "armeabi-v7a"]
           EOF
+
       - name: Build APK
         run: |
           cd redaffair
           ksproject android build release
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
