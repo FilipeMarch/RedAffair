@@ -13,7 +13,7 @@ icon.filename = %(source.dir)s/RAlogos.png
 android.accept_sdk_license = True
 android.ndk = 28c
 android.api = 36
-android.minapi = 24
+android.minapi = 28
 android.archs = arm64-v8a
 
 [buildozer]
