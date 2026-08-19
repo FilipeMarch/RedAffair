@@ -22,6 +22,15 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
+      - name: Debug environment
+        run: |
+          echo "=== PATH ==="
+          echo $PATH
+          echo "=== which uv ==="
+          which uv || echo "uv not found"
+          echo "=== which python3 ==="
+          which python3
+
       - name: Install ksproject
         run: |
           pip install --upgrade pip
