@@ -26,9 +26,9 @@ jobs:
         # Download and unpack commandline tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
-        # Move to correct Android SDK structure (cmdline-tools/latest)
-        mkdir -p android-sdk/cmdline-tools
-        mv cmdline-tools/latest android-sdk/cmdline-tools/
+        # Create the SDK standard folder structure
+        mkdir -p android-sdk/cmdline-tools/latest
+        mv cmdline-tools/* android-sdk/cmdline-tools/latest/
         rm -rf cmdline-tools
         # Symlink latest to tools so Buildozer finds it at the expected path
         export ANDROID_HOME=/home/runner/.buildozer/android/platform/android-sdk
