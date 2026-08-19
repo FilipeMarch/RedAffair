@@ -16,7 +16,8 @@ jobs:
         python-version: "3.10"
     - name: Install system deps
       run: |
-        sudo apt-get update
+        sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+        sudo apt-get update -o Acquire::Timeout=10 -o Acquire::Retries=3
         sudo apt-get install -y pkg-config python3-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev
     - name: Install NDK 28c manually
       run: |
