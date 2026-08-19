@@ -43,7 +43,7 @@ jobs:
 
           [tool.kivy-school.android]
           package_name = "ws.tilda.sentryprotocol.redaffair"
-          archs = ["arm64-v8a", "armeabi-v7a"]
+          archs = ["arm64-v8a", "armeabi"]
           EOF
 
       - name: Build APK
