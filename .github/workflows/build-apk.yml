@@ -17,42 +17,15 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install ksproject
-        run: |
-          pip install --upgrade pip
-          pip install git+https://github.com/kivy-school/ksproject.git
-
-      - name: Create pyproject.toml
-        run: |
-          mkdir -p redaffair
-          cat > redaffair/pyproject.toml << 'EOF'
-          [project]
-          name = "redaffair"
-          version = "1.210.1"
-          description = "Red Affair game"
-          requires-python = ">=3.10"
-          dependencies = [
-              "kivy",
-              "charset_normalizer==2.1.1"
-          ]
-
-          [tool.kivy-school]
-          package = "ws.tilda.sentryprotocol.redaffair"
-          entry_point = "main.py"
-          version_code = 12101
-
-          [tool.kivy-school.android]
-          # Android build settings (minimal)
-          EOF
+      - name: Install anvpy
+        run: pip install anvpy
 
       - name: Build APK
-        run: |
-          cd redaffair
-          ksproject android build release
+        run: anvpy build --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
-          path: redaffair/dist/*.apk
+          path: dist/*.apk
           if-no-files-found: error
