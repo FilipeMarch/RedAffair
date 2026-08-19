@@ -17,52 +17,15 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install uv and ksproject
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          pip install git+https://github.com/kivy-school/ksproject.git
-
-      - name: Create project layout manually
-        run: |
-          mkdir -p redaffair/src/redaffair
-          cp main.py game.py redaffair/src/redaffair/
-          cp pyproject.toml redaffair/
-
-      - name: Pre‑download Kivy wheel
-        run: |
-          mkdir -p redaffair/wheelhouse
-          pip download --only-binary :all: --platform android_24_arm64_v8a --python-version 3.13 --extra-index-url https://pypi.anaconda.org/kivyschool/simple --dest redaffair/wheelhouse kivy==2.3.1
+      - name: Install anvpy
+        run: pip install anvpy
 
       - name: Build APK
-        run: |
-          cd redaffair
-          ksproject android build release 2>&1 | tee build.log
-
-      - name: Extract errors and warnings from build log
-        if: always()
-        run: |
-          cd redaffair
-          if [ -f build.log ]; then
-            echo "=== ERROR / WARNING / FAILURE SUMMARY (last 100 matches) ==="
-            grep -i -E "error|warning|exception|fail|fatal" build.log | tail -100
-            echo "=== Full log saved as artifact ==="
-          else
-            echo "build.log not found"
-          fi
+        run: anvpy build --release
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
-          path: redaffair/dist/*.apk
+          path: dist/*.apk
           if-no-files-found: error
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: redaffair/build.log
-          if-no-files-found: warn
