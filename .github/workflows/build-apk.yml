@@ -37,11 +37,32 @@ jobs:
       - name: Build APK
         run: |
           cd redaffair
-          ksproject android build release
+          yes | buildozer -v android debug 2>&1 | tee build.log
+
+      - name: Extract errors and warnings from build log
+        if: always()
+        run: |
+          cd redaffair
+          if [ -f build.log ]; then
+            echo "=== ERROR / WARNING / FAILURE SUMMARY (last 100 matches) ==="
+            grep -i -E "error|warning|exception|fail|fatal" build.log | tail -100
+            echo "=== Full log saved as artifact ==="
+          else
+            echo "build.log not found"
+          fi
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: redaffair-apk
           path: redaffair/dist/*.apk
           if-no-files-found: error
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: redaffair/build.log
+          if-no-files-found: warn
