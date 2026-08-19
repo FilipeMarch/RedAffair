@@ -40,6 +40,9 @@ jobs:
           package = "ws.tilda.sentryprotocol.redaffair"
           entry_point = "main.py"
           version_code = 12101
+
+          [tool.kivy-school.android]
+          # Android build settings (minimal)
           EOF
 
       - name: Build APK
