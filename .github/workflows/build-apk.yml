@@ -26,13 +26,13 @@ jobs:
         # Download and unpack commandline tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
-        # Find the directory containing sdkmanager and move its parent contents to tools
-        mkdir -p android-sdk/tools
-        SDKMANAGER_DIR=$(find cmdline-tools -name sdkmanager -type f -exec dirname {} \; | head -1 | xargs dirname)
-        mv $SDKMANAGER_DIR/* android-sdk/tools/
+        # Move to correct Android SDK structure (cmdline-tools/latest)
+        mkdir -p android-sdk/cmdline-tools
+        mv cmdline-tools/latest android-sdk/cmdline-tools/
         rm -rf cmdline-tools
-        # Accept licenses and install NDK
+        # Symlink latest to tools so Buildozer finds it at the expected path
         export ANDROID_HOME=/home/runner/.buildozer/android/platform/android-sdk
+        ln -sf $ANDROID_HOME/cmdline-tools/latest $ANDROID_HOME/tools
         yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
         $ANDROID_HOME/tools/bin/sdkmanager "ndk;28.0.12433566"
         # Create symlink for Buildozer's expected NDK path
