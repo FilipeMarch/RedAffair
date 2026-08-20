@@ -1,5 +1,9 @@
 name: Build APK with ksproject
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-22.04
